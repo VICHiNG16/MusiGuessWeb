@@ -25,9 +25,8 @@ export default function MultiplayerScreen() {
 
     // Artist search state
     const [artistQuery, setArtistQuery] = useState('');
-    const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
-    const [searchResults, setSearchResults] = useState<any[]>([]);
-    const [searching, setSearching] = useState(false);
+    // Updated state to track image
+    const [selectedArtistImage, setSelectedArtistImage] = useState<string | null>(null);
 
     // Join room state
     const [gameCode, setGameCode] = useState('');
@@ -43,14 +42,16 @@ export default function MultiplayerScreen() {
             } else if (artistQuery.length === 0) {
                 setSearchResults([]);
                 setSelectedArtist(null);
+                setSelectedArtistImage(null);
             }
         }, 500);
         return () => clearTimeout(timer);
     }, [artistQuery, selectedArtist]);
 
-    const selectArtist = (name: string) => {
-        setSelectedArtist(name);
-        setArtistQuery(name);
+    const selectArtist = (item: any) => {
+        setSelectedArtist(item.artistName);
+        setSelectedArtistImage(item.image);
+        setArtistQuery(item.artistName);
         setSearchResults([]);
     };
 
@@ -59,13 +60,10 @@ export default function MultiplayerScreen() {
 
         if (roomId) {
             // Update existing room for Change Artist flow
-            const artistData = searchResults.find(r => r.artistName === selectedArtist);
-            const image = artistData ? artistData.image : '';
-
             try {
                 await update(ref(db, `rooms/${roomId}`), {
                     artist: selectedArtist,
-                    artistImage: image,
+                    artistImage: selectedArtistImage || '',
                     // Optionally reset status if needed, but usually fine to keep
                 });
                 router.replace(`/lobby/${roomId}?isHost=true&username=${encodeURIComponent(String(username))}`);
@@ -76,11 +74,8 @@ export default function MultiplayerScreen() {
         }
 
         // Create NEW room
-        const artistData = searchResults.find(r => r.artistName === selectedArtist);
-        const image = artistData ? artistData.image : '';
-
         const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-        router.push(`/lobby/${newRoomId}?isHost=true&mode=multi&artist=${encodeURIComponent(selectedArtist)}&artistImage=${encodeURIComponent(image)}&username=${encodeURIComponent(String(username))}`);
+        router.push(`/lobby/${newRoomId}?isHost=true&mode=multi&artist=${encodeURIComponent(selectedArtist)}&artistImage=${encodeURIComponent(selectedArtistImage || '')}&username=${encodeURIComponent(String(username))}`);
     };
 
     const joinRoom = () => {
@@ -157,7 +152,7 @@ export default function MultiplayerScreen() {
                                         <Pressable
                                             key={item.artistId}
                                             style={styles.dropdownItem}
-                                            onPress={() => selectArtist(item.artistName)}
+                                            onPress={() => selectArtist(item)}
                                         >
                                             {item.image && (
                                                 <Image source={{ uri: item.image }} style={styles.artistImage} />
