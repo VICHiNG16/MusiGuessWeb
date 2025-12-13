@@ -52,22 +52,33 @@ function StreakCounterComponent({ streak, visible, style }: StreakCounterProps) 
                 isLegendary && styles.legendary
             ]}
         >
-            <View style={styles.iconContainer}>
-                {isLegendary ? (
-                    <Text style={styles.legendaryEmoji}>🏆</Text>
-                ) : isOnFire ? (
-                    <Ionicons name="flame" size={18} color={Colors.fast} />
-                ) : (
-                    <Ionicons name="flash" size={18} color={Colors.primary} />
-                )}
+            style={[
+                styles.container,
+                style,
+                animatedStyle,
+                isOnFire && styles.onFire,
+                isLegendary && styles.legendary
+            ]}
+        >
+            <View style={styles.topRow}>
+                <View style={styles.iconContainer}>
+                    {isLegendary ? (
+                        <Text style={styles.legendaryEmoji}>🏆</Text>
+                    ) : isOnFire ? (
+                        <Ionicons name="flame" size={24} color={Colors.fast} />
+                    ) : (
+                        <Ionicons name="flash" size={24} color={Colors.primary} />
+                    )}
+                </View>
+                <Text style={[
+                    styles.count,
+                    isOnFire && styles.countFire,
+                    isLegendary && styles.countLegendary
+                ]}>
+                    {streak}
+                </Text>
             </View>
-            <Text style={[
-                styles.count,
-                isOnFire && styles.countFire,
-                isLegendary && styles.countLegendary
-            ]}>
-                {streak}
-            </Text>
+
             <Text style={styles.label}>STREAK</Text>
             {streak > 0 && (
                 <Text style={styles.bonus}>+{Math.min(streak * 100, 500)}</Text>
@@ -100,18 +111,26 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255, 204, 0, 0.15)',
         borderColor: Colors.lightning,
     },
-    iconContainer: {
-        marginBottom: 2,
+    topRow: {
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        marginBottom: 2,
+    },
+    iconContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     legendaryEmoji: {
-        fontSize: 18,
+        fontSize: 24,
     },
     count: {
-        fontSize: 22,
+        fontSize: 32,
         fontWeight: '900',
         color: Colors.primary,
         textAlign: 'center',
+        fontVariant: ['tabular-nums'],
     },
     countFire: {
         color: Colors.fast,
@@ -120,11 +139,12 @@ const styles = StyleSheet.create({
         color: Colors.lightning,
     },
     label: {
-        fontSize: 9,
-        fontWeight: 'bold',
+        fontSize: 10,
+        fontWeight: '900',
         color: Colors.textSecondary,
         letterSpacing: 1,
         textAlign: 'center',
+        textTransform: 'uppercase',
     },
     bonus: {
         fontSize: 11,
