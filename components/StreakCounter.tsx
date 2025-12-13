@@ -52,15 +52,7 @@ function StreakCounterComponent({ streak, visible, style }: StreakCounterProps) 
                 isLegendary && styles.legendary
             ]}
         >
-            <View style={styles.iconContainer}>
-                {isLegendary ? (
-                    <Text style={styles.legendaryEmoji}>🏆</Text>
-                ) : isOnFire ? (
-                    <Ionicons name="flame" size={18} color={Colors.fast} />
-                ) : (
-                    <Ionicons name="flash" size={18} color={Colors.primary} />
-                )}
-            </View>
+            <Text style={styles.label}>STREAK</Text>
             <Text style={[
                 styles.count,
                 isOnFire && styles.countFire,
@@ -68,9 +60,8 @@ function StreakCounterComponent({ streak, visible, style }: StreakCounterProps) 
             ]}>
                 {streak}
             </Text>
-            <Text style={styles.label}>STREAK</Text>
             {streak > 0 && (
-                <Text style={styles.bonus}>+{Math.min(streak * 100, 500)}</Text>
+                <Text style={styles.bonus}>+{Math.min(streak * 100, 500)} PTS</Text>
             )}
         </Animated.View>
     );
@@ -81,31 +72,30 @@ export const StreakCounter = memo(StreakCounterComponent);
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        padding: 10,
-        paddingHorizontal: 14,
-        backgroundColor: 'rgba(0, 243, 255, 0.1)',
-        borderRadius: 10,
+        justifyContent: 'center',
+        padding: 16,
+        paddingHorizontal: 24,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        borderRadius: 4,
         borderWidth: 1,
         borderColor: Colors.primary,
+        minWidth: 100,
     },
     onFire: {
-        backgroundColor: 'rgba(255, 107, 53, 0.15)',
         borderColor: Colors.fast,
+        backgroundColor: 'rgba(255, 107, 53, 0.1)',
     },
     legendary: {
-        backgroundColor: 'rgba(255, 204, 0, 0.15)',
         borderColor: Colors.lightning,
-    },
-    iconContainer: {
-        marginBottom: 2,
-    },
-    legendaryEmoji: {
-        fontSize: 18,
+        backgroundColor: 'rgba(255, 204, 0, 0.1)',
     },
     count: {
-        fontSize: 22,
+        fontSize: 32,
         fontWeight: '900',
         color: Colors.primary,
+        fontVariant: ['tabular-nums'],
+        lineHeight: 32,
+        marginVertical: 4,
     },
     countFire: {
         color: Colors.fast,
@@ -114,13 +104,14 @@ const styles = StyleSheet.create({
         color: Colors.lightning,
     },
     label: {
-        fontSize: 9,
-        fontWeight: 'bold',
+        fontSize: 10,
+        fontWeight: '900',
         color: Colors.textSecondary,
-        letterSpacing: 1,
+        letterSpacing: 2,
+        textTransform: 'uppercase',
     },
     bonus: {
-        fontSize: 11,
+        fontSize: 10,
         fontWeight: 'bold',
         color: Colors.success,
         marginTop: 2,

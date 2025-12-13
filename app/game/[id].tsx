@@ -694,9 +694,9 @@ const styles = StyleSheet.create({
 
     // Reveal
     revealContainer: { alignItems: 'center', width: '100%', paddingBottom: 40 },
-    artwork: { width: 200, height: 200, borderRadius: 20, marginBottom: 20, borderWidth: 2, borderColor: Colors.surfaceHighlight },
-    songTitle: { color: Colors.text, fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
-    artistName: { color: Colors.primary, fontSize: 20, marginBottom: 30 },
+    artwork: { width: 220, height: 220, marginBottom: 24, borderWidth: 1, borderColor: '#fff' },
+    songTitle: { color: Colors.text, fontSize: 32, fontWeight: '900', textAlign: 'center', marginBottom: 8, letterSpacing: -1 },
+    artistName: { color: Colors.primary, fontSize: 16, marginBottom: 24, fontWeight: 'bold', letterSpacing: 2, textTransform: 'uppercase' },
     deltaScore: { fontSize: 48, fontWeight: '900', textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 10 },
     waitingTextReveal: { color: Colors.textSecondary, marginTop: 20, fontStyle: 'italic' },
 

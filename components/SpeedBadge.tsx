@@ -27,9 +27,8 @@ function SpeedBadgeComponent({ tier, points, visible, style }: SpeedBadgeProps) 
     return (
         <Animated.View
             entering={ZoomIn.springify().damping(12)}
-            style={[styles.container, { backgroundColor: info.color + '30', borderColor: info.color }, style]}
+            style={[styles.container, { backgroundColor: 'rgba(0,0,0,0.6)', borderColor: info.color }, style]}
         >
-            <Text style={styles.emoji}>{info.emoji}</Text>
             <View style={styles.textContainer}>
                 <Text style={[styles.label, { color: info.color }]}>{info.label}</Text>
                 <Text style={styles.points}>+{points.toLocaleString()}</Text>
@@ -42,28 +41,28 @@ export const SpeedBadge = memo(SpeedBadgeComponent);
 
 const styles = StyleSheet.create({
     container: {
-        flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 16,
-        borderWidth: 2,
-        gap: 12,
-    },
-    emoji: {
-        fontSize: 32,
+        justifyContent: 'center',
+        paddingHorizontal: 24,
+        paddingVertical: 16,
+        borderRadius: 4,
+        borderWidth: 1,
+        minWidth: 140,
     },
     textContainer: {
-        alignItems: 'flex-start',
+        alignItems: 'center',
     },
     label: {
-        fontSize: 14,
-        fontWeight: 'bold',
+        fontSize: 12,
+        fontWeight: '900',
         letterSpacing: 2,
+        textTransform: 'uppercase',
+        marginBottom: 4,
     },
     points: {
-        fontSize: 24,
+        fontSize: 32,
         fontWeight: '900',
         color: Colors.text,
+        fontVariant: ['tabular-nums'],
     },
 });
