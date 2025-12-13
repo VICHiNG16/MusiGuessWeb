@@ -236,7 +236,7 @@ export default function LobbyScreen() {
                     <Pressable
                         onPress={() => {
                             const currentUsername = username || (players.find(p => p.isHost)?.name || 'Host');
-                            router.replace(`/multiplayer?username=${encodeURIComponent(String(currentUsername))}`);
+                            router.replace(`/multiplayer?username=${encodeURIComponent(String(currentUsername))}&roomId=${id}`);
                         }}
                         style={styles.changeArtistButton}
                     >

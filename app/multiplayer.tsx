@@ -7,10 +7,12 @@ import { Colors } from '../constants/Colors';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { searchArtists } from '../utils/itunes';
+import { ref, update } from 'firebase/database';
+import { db } from '../utils/firebaseConfig';
 
 export default function MultiplayerScreen() {
     const router = useRouter();
-    const { username } = useLocalSearchParams();
+    const { username, roomId } = useLocalSearchParams();
     const { width } = useWindowDimensions();
     const isMobile = width < 768;
 
@@ -52,10 +54,29 @@ export default function MultiplayerScreen() {
         setSearchResults([]);
     };
 
-    const startGame = () => {
+    const startGame = async () => {
         if (!selectedArtist || !username) return;
-        const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-        router.push(`/lobby/${roomId}?isHost=true&mode=multi&artist=${encodeURIComponent(selectedArtist)}&username=${encodeURIComponent(String(username))}`);
+
+        if (roomId) {
+            // Update existing room for Change Artist flow
+            const artistData = searchResults.find(r => r.artistName === selectedArtist);
+            const image = artistData ? artistData.image : '';
+
+            try {
+                await update(ref(db, `rooms/${roomId}`), {
+                    artist: selectedArtist,
+                    artistImage: image,
+                    // Optionally reset status if needed, but usually fine to keep
+                });
+                router.replace(`/lobby/${roomId}?isHost=true&username=${encodeURIComponent(String(username))}`);
+            } catch (e) {
+                console.error("Failed to update room:", e);
+            }
+            return;
+        }
+
+        const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+        router.push(`/lobby/${newRoomId}?isHost=true&mode=multi&artist=${encodeURIComponent(selectedArtist)}&username=${encodeURIComponent(String(username))}`);
     };
 
     const joinRoom = () => {
@@ -107,8 +128,8 @@ export default function MultiplayerScreen() {
                         {/* HOST Section */}
                         <Animated.View entering={FadeInDown.delay(100)} style={[styles.card, isMobile && styles.cardMobile]}>
                             <View style={styles.cardHeader}>
-                                <Ionicons name="add-circle" size={20} color={Colors.primary} />
-                                <Text style={styles.cardTitle}>HOST A GAME</Text>
+                                <Ionicons name={roomId ? "create" : "add-circle"} size={20} color={Colors.primary} />
+                                <Text style={styles.cardTitle}>{roomId ? "CHANGE ARTIST" : "HOST A GAME"}</Text>
                             </View>
 
                             <Text style={styles.label}>SELECT ARTIST</Text>
@@ -148,7 +169,7 @@ export default function MultiplayerScreen() {
 
                             {selectedArtist && (
                                 <GlassButton
-                                    title="Create Room"
+                                    title={roomId ? "Update Lobby" : "Create Room"}
                                     onPress={startGame}
                                     variant="success"
                                     style={{ marginTop: 16 }}
@@ -156,37 +177,41 @@ export default function MultiplayerScreen() {
                             )}
                         </Animated.View>
 
-                        {/* Divider */}
-                        <View style={styles.dividerContainer}>
-                            <View style={styles.dividerLine} />
-                            <Text style={styles.dividerText}>OR</Text>
-                            <View style={styles.dividerLine} />
-                        </View>
+                        {roomId ? null : (
+                            <>
+                                {/* Divider */}
+                                <View style={styles.dividerContainer}>
+                                    <View style={styles.dividerLine} />
+                                    <Text style={styles.dividerText}>OR</Text>
+                                    <View style={styles.dividerLine} />
+                                </View>
 
-                        {/* JOIN Section */}
-                        <Animated.View entering={FadeInDown.delay(200)} style={[styles.card, isMobile && styles.cardMobile]}>
-                            <View style={styles.cardHeader}>
-                                <Ionicons name="enter" size={20} color={Colors.success} />
-                                <Text style={[styles.cardTitle, { color: Colors.success }]}>JOIN A GAME</Text>
-                            </View>
+                                {/* JOIN Section */}
+                                <Animated.View entering={FadeInDown.delay(200)} style={[styles.card, isMobile && styles.cardMobile]}>
+                                    <View style={styles.cardHeader}>
+                                        <Ionicons name="enter" size={20} color={Colors.success} />
+                                        <Text style={[styles.cardTitle, { color: Colors.success }]}>JOIN A GAME</Text>
+                                    </View>
 
-                            <Text style={styles.label}>ROOM CODE</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Enter 6-digit code"
-                                placeholderTextColor={Colors.textSecondary}
-                                value={gameCode}
-                                onChangeText={(t) => setGameCode(t.toUpperCase())}
-                                maxLength={6}
-                                autoCapitalize="characters"
-                            />
-                            <GlassButton
-                                title="Join Room"
-                                onPress={joinRoom}
-                                style={{ marginTop: 16 }}
-                                disabled={gameCode.length < 3}
-                            />
-                        </Animated.View>
+                                    <Text style={styles.label}>ROOM CODE</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Enter 6-digit code"
+                                        placeholderTextColor={Colors.textSecondary}
+                                        value={gameCode}
+                                        onChangeText={(t) => setGameCode(t.toUpperCase())}
+                                        maxLength={6}
+                                        autoCapitalize="characters"
+                                    />
+                                    <GlassButton
+                                        title="Join Room"
+                                        onPress={joinRoom}
+                                        style={{ marginTop: 16 }}
+                                        disabled={gameCode.length < 3}
+                                    />
+                                </Animated.View>
+                            </>
+                        )}
                     </Animated.View>
                 </ScrollView>
             </KeyboardAvoidingView>
