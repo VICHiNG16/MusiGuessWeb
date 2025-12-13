@@ -391,37 +391,50 @@ export default function GameScreen() {
         return (
             <View style={styles.container}>
                 <BackgroundGradient />
-                <View style={[styles.centerContent, { padding: 20 }]}>
-                    <Text style={styles.gameOverTitle}>{isWinner ? "VICTORY" : "GAME OVER"}</Text>
-                    <Text style={styles.finalScore}>Winner: {winner.name}</Text>
-                    <Text style={styles.finalScoreOpp}>Score: {winner.score}</Text>
+                <View style={styles.gameOverContainer}>
+                    <View style={styles.centerContent}>
+                        <Text style={styles.gameOverTitle}>{isWinner ? "VICTORY" : "GAME OVER"}</Text>
+                        <Text style={styles.finalScore}>Winner: {winner.name}</Text>
+                        <Text style={styles.finalScoreOpp}>Score: {winner.score}</Text>
 
-                    <View style={styles.leaderboardContainer}>
-                        {players.map((p, idx) => (
-                            <View key={p.uid} style={styles.rankRow}>
-                                <Text style={styles.rankNum}>#{idx + 1}</Text>
-                                <Text style={[styles.rankName, p.uid === currentUid && { color: Colors.primary }]}>{p.name}</Text>
-                                <Text style={styles.rankScore}>{p.score}</Text>
-                            </View>
-                        ))}
-                    </View>
+                        <View style={styles.leaderboardContainer}>
+                            {players.map((p, idx) => (
+                                <View key={p.uid} style={styles.rankRow}>
+                                    <Text style={styles.rankNum}>#{idx + 1}</Text>
+                                    <Text style={[styles.rankName, p.uid === currentUid && { color: Colors.primary }]}>{p.name}</Text>
+                                    <Text style={styles.rankScore}>{p.score}</Text>
+                                </View>
+                            ))}
+                        </View>
 
-                    {currentSong?.trackViewUrl && (
+                        {currentSong?.trackViewUrl && (
+                            <GlassButton
+                                title="Listen on Apple Music 🎵"
+                                onPress={() => Linking.openURL(currentSong.trackViewUrl)}
+                                style={{ marginTop: 20, backgroundColor: 'rgba(250, 35, 59, 0.2)', borderColor: '#fa233b' }}
+                            />
+                        )}
+
                         <GlassButton
-                            title="Listen on Apple Music 🎵"
-                            onPress={() => Linking.openURL(currentSong.trackViewUrl)}
-                            style={{ marginTop: 20, backgroundColor: 'rgba(250, 35, 59, 0.2)', borderColor: '#fa233b' }}
+                            title={shareCopied ? "Copied! ✓" : "Share Results 📋"}
+                            onPress={shareResults}
+                            variant={shareCopied ? "success" : "secondary"}
+                            style={{ marginTop: 20 }}
                         />
-                    )}
 
-                    <GlassButton
-                        title={shareCopied ? "Copied! ✓" : "Share Results 📋"}
-                        onPress={shareResults}
-                        variant={shareCopied ? "success" : "secondary"}
-                        style={{ marginTop: 20 }}
-                    />
-                    <GlassButton title="Return to Lobby" onPress={() => router.replace('/')} style={{ marginTop: 15 }} />
-                    <AdBanner style={{ marginTop: 30 }} />
+                        {/* Play Again button for multiplayer */}
+                        {mode !== 'solo' && isHost && (
+                            <GlassButton
+                                title="Play Again 🔄"
+                                onPress={() => router.replace(`/lobby/${id}?isHost=true&mode=multi&artist=${encodeURIComponent(gameData.artist || '')}`)}
+                                variant="success"
+                                style={{ marginTop: 15 }}
+                            />
+                        )}
+
+                        <GlassButton title="Return Home" onPress={() => router.replace('/')} style={{ marginTop: 15 }} />
+                        <AdBanner style={{ marginTop: 30 }} />
+                    </View>
                 </View>
             </View>
         );
@@ -652,6 +665,12 @@ const styles = StyleSheet.create({
     waitingText: { color: Colors.text, fontSize: 18, opacity: 0.8 },
 
     // Game Over
+    gameOverContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
     centerContent: { alignItems: 'center', width: '100%', maxWidth: 500 },
     gameOverTitle: { fontSize: 48, color: Colors.primary, fontWeight: '900', marginBottom: 20 },
     finalScore: { fontSize: 24, color: Colors.text, marginBottom: 5 },

@@ -12,7 +12,7 @@ import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { AdBanner } from '../../components/AdBanner';
 
 export default function LobbyScreen() {
-    const { id, isHost, artist, mode, artistImage } = useLocalSearchParams();
+    const { id, isHost, artist, mode, artistImage, username } = useLocalSearchParams();
     const router = useRouter();
     const [status, setStatus] = useState('waiting');
     const [players, setPlayers] = useState<any[]>([]);
@@ -101,9 +101,10 @@ export default function LobbyScreen() {
             }
 
             const playerNumber = playerList.length + 1;
+            const playerName = username ? String(username) : `Player ${playerNumber}`;
 
             await update(ref(db, `rooms/${id}/players/${currentUid}`), {
-                name: `Player ${playerNumber}`,
+                name: playerName,
                 score: 0,
                 isHost: false,
                 joinedAt: Date.now()
@@ -228,6 +229,17 @@ export default function LobbyScreen() {
 
                 <Text style={styles.artistLabel}><Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 24 }}>{roomData.artist}</Text></Text>
 
+                {/* Host can change artist */}
+                {isHost === 'true' && (
+                    <Pressable
+                        onPress={() => router.replace('/')}
+                        style={styles.changeArtistButton}
+                    >
+                        <Ionicons name="swap-horizontal" size={16} color={Colors.primary} />
+                        <Text style={styles.changeArtistText}>Change Artist</Text>
+                    </Pressable>
+                )}
+
                 <View style={styles.playerListContainer}>
                     <Text style={styles.sectionHeader}>Players ({players.length}/6)</Text>
                     <FlatList
@@ -325,5 +337,22 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Colors.primary,
         fontWeight: 'bold',
+    },
+    changeArtistButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        padding: 8,
+        paddingHorizontal: 14,
+        marginTop: 10,
+        marginBottom: 10,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    changeArtistText: {
+        fontSize: 14,
+        color: Colors.primary,
     },
 });

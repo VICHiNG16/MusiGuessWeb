@@ -22,6 +22,7 @@ export default function HomeScreen() {
 
     const [viewMode, setViewMode] = useState<ViewMode>('MENU');
     const [gameCode, setGameCode] = useState('');
+    const [username, setUsername] = useState('');
     const [artistQuery, setArtistQuery] = useState('');
     const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
     const [searchResults, setSearchResults] = useState<ArtistResult[]>([]);
@@ -72,8 +73,8 @@ export default function HomeScreen() {
     };
 
     const joinRoom = () => {
-        if (gameCode.length > 0) {
-            router.push(`/lobby/${gameCode}?isHost=false`);
+        if (gameCode.length > 0 && username.trim()) {
+            router.push(`/lobby/${gameCode}?isHost=false&username=${encodeURIComponent(username.trim())}`);
         }
     };
 
@@ -152,16 +153,30 @@ export default function HomeScreen() {
             <View style={styles.multiColumn}>
                 <Text style={styles.columnTitle}>JOIN</Text>
                 <View style={styles.section}>
-                    <Text style={styles.label}>ENTER CODE</Text>
+                    <Text style={styles.label}>YOUR NAME</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="6-Digit Room Code"
+                        placeholder="Enter your name"
+                        placeholderTextColor={Colors.textSecondary}
+                        value={username}
+                        onChangeText={setUsername}
+                        maxLength={20}
+                    />
+                    <Text style={[styles.label, { marginTop: 15 }]}>ROOM CODE</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="6-Digit Code"
                         placeholderTextColor={Colors.textSecondary}
                         value={gameCode}
                         onChangeText={(t) => setGameCode(t.toUpperCase())}
                         maxLength={6}
                     />
-                    <GlassButton title="Join Room" onPress={joinRoom} style={{ marginTop: 20 }} />
+                    <GlassButton
+                        title="Join Room"
+                        onPress={joinRoom}
+                        style={{ marginTop: 20 }}
+                        disabled={!username.trim() || gameCode.length < 3}
+                    />
                 </View>
             </View>
         </Animated.View>
