@@ -331,10 +331,7 @@ export default function HomeScreen() {
                     <Ionicons name="settings-outline" size={28} color={Colors.textSecondary} />
                 </Pressable>
 
-                <SettingsModal
-                    visible={settingsVisible}
-                    onClose={() => setSettingsVisible(false)}
-                />
+
 
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -370,6 +367,10 @@ export default function HomeScreen() {
 
                 {renderCookieBanner()}
             </SafeAreaView>
+
+            {settingsVisible && (
+                <SettingsModal onClose={() => setSettingsVisible(false)} />
+            )}
         </View>
     );
 }

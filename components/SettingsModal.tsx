@@ -1,71 +1,78 @@
-import { Modal, View, Text, StyleSheet, Switch, Pressable, Linking } from 'react-native';
+import { View, Text, StyleSheet, Switch, Pressable, Linking } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Colors } from '../constants/Colors';
 import { GlassButton } from './GlassButton';
 import { useSettings } from '../context/SettingsContext';
+import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
 interface Props {
-    visible: boolean;
     onClose: () => void;
 }
 
-export function SettingsModal({ visible, onClose }: Props) {
+export function SettingsModal({ onClose }: Props) {
     const { soundEnabled, hapticsEnabled, toggleSound, toggleHaptics } = useSettings();
 
     return (
-        <Modal
-            animationType="fade"
-            transparent={true}
-            visible={visible}
-            onRequestClose={onClose}
+        <Animated.View
+            style={styles.container}
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(200)}
         >
-            <View style={styles.centeredView}>
-                <BlurView intensity={30} tint="dark" style={styles.blur} />
-                <View style={styles.modalView}>
-                    <Text style={styles.title}>SETTINGS</Text>
+            <BlurView intensity={30} tint="dark" style={styles.blur} />
+            <Pressable style={styles.backdrop} onPress={onClose} />
 
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Sound Effects</Text>
-                        <Switch
-                            value={soundEnabled}
-                            onValueChange={toggleSound}
-                            trackColor={{ false: "#767577", true: Colors.primary }}
-                            thumbColor={"#f4f3f4"}
-                        />
-                    </View>
+            <Animated.View
+                style={styles.modalView}
+                entering={ZoomIn.springify().damping(15)}
+                exiting={ZoomOut.duration(150)}
+            >
+                <Text style={styles.title}>SETTINGS</Text>
 
-                    <View style={styles.row}>
-                        <Text style={styles.label}>Haptic Feedback</Text>
-                        <Switch
-                            value={hapticsEnabled}
-                            onValueChange={toggleHaptics}
-                            trackColor={{ false: "#767577", true: Colors.primary }}
-                            thumbColor={"#f4f3f4"}
-                        />
-                    </View>
-
-                    <View style={styles.divider} />
-
-                    <Pressable onPress={() => Linking.openURL('https://github.com/VICHiNG16/MusiGuess')}>
-                        <Text style={styles.link}>View on GitHub</Text>
-                    </Pressable>
-
-                    <GlassButton title="Close" onPress={onClose} style={{ marginTop: 20 }} />
+                <View style={styles.row}>
+                    <Text style={styles.label}>Sound Effects</Text>
+                    <Switch
+                        value={soundEnabled}
+                        onValueChange={toggleSound}
+                        trackColor={{ false: "#767577", true: Colors.primary }}
+                        thumbColor={"#f4f3f4"}
+                    />
                 </View>
-            </View>
-        </Modal>
+
+                <View style={styles.row}>
+                    <Text style={styles.label}>Haptic Feedback</Text>
+                    <Switch
+                        value={hapticsEnabled}
+                        onValueChange={toggleHaptics}
+                        trackColor={{ false: "#767577", true: Colors.primary }}
+                        thumbColor={"#f4f3f4"}
+                    />
+                </View>
+
+                <View style={styles.divider} />
+
+                <Pressable onPress={() => Linking.openURL('https://github.com/VICHiNG16/MusiGuess')}>
+                    <Text style={styles.link}>View on GitHub</Text>
+                </Pressable>
+
+                <GlassButton title="Close" onPress={onClose} style={{ marginTop: 20 }} />
+            </Animated.View>
+        </Animated.View>
     );
 }
 
 const styles = StyleSheet.create({
-    centeredView: {
-        flex: 1,
+    container: {
+        ...StyleSheet.absoluteFillObject,
         justifyContent: "center",
         alignItems: "center",
+        zIndex: 1000,
     },
     blur: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0,0,0,0.7)'
+        backgroundColor: 'rgba(0,0,0,0.5)'
+    },
+    backdrop: {
+        ...StyleSheet.absoluteFillObject,
     },
     modalView: {
         width: '80%',
