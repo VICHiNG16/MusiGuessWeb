@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, Text, StyleSheet, View, Platform } from 'react-native';
+import { Pressable, Text, StyleSheet, View, Platform, useWindowDimensions } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
@@ -23,6 +23,9 @@ interface ModeCardProps {
 const SMOOTH_EASING = Easing.out(Easing.cubic);
 
 export function ModeCard({ title, description, icon, iconColor, onPress }: ModeCardProps) {
+    const { width } = useWindowDimensions();
+    const isMobile = width < 768;
+
     const scale = useSharedValue(1);
     const glowOpacity = useSharedValue(0);
     const translateY = useSharedValue(0);
@@ -64,6 +67,11 @@ export function ModeCard({ title, description, icon, iconColor, onPress }: ModeC
         }
     };
 
+    // Responsive styles
+    const containerSize = isMobile ? { width: '100%' as const, height: 140, flexDirection: 'row' as const, paddingHorizontal: 20 } : { width: 280, height: 280, flexDirection: 'column' as const };
+    const iconSize = isMobile ? { width: 60, height: 60 } : { width: 80, height: 80 };
+    const iconFontSize = isMobile ? 30 : 40;
+
     return (
         <AnimatedPressable
             onPress={onPress}
@@ -72,7 +80,7 @@ export function ModeCard({ title, description, icon, iconColor, onPress }: ModeC
             // @ts-ignore - Web only
             onMouseEnter={handleHoverIn}
             onMouseLeave={handleHoverOut}
-            style={[styles.container, animatedStyle]}
+            style={[styles.container, containerSize, animatedStyle]}
         >
             {/* Glow border */}
             <Animated.View
@@ -83,56 +91,68 @@ export function ModeCard({ title, description, icon, iconColor, onPress }: ModeC
                 ]}
             />
 
-            <View style={[styles.iconCircle, { backgroundColor: iconColor + '33' }]}>
-                <Ionicons name={icon} size={40} color={iconColor} />
+            <View style={[styles.iconCircle, iconSize, { backgroundColor: iconColor + '33', marginRight: isMobile ? 16 : 0, marginBottom: isMobile ? 0 : 20 }]}>
+                <Ionicons name={icon} size={iconFontSize} color={iconColor} />
             </View>
 
-            <Text style={styles.title}>{title}</Text>
-            <Text style={styles.description}>{description}</Text>
+            <View style={isMobile ? styles.textContainerMobile : styles.textContainerDesktop}>
+                <Text style={[styles.title, isMobile && styles.titleMobile]}>{title}</Text>
+                <Text style={[styles.description, isMobile && styles.descriptionMobile]}>{description}</Text>
+            </View>
         </AnimatedPressable>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        width: 280,
-        height: 280,
         backgroundColor: 'rgba(30, 30, 40, 0.6)',
-        borderRadius: 24,
+        borderRadius: 20,
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.1)',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 24,
+        padding: 20,
         cursor: 'pointer' as any,
         position: 'relative',
     },
     glowBorder: {
         ...StyleSheet.absoluteFillObject,
-        borderRadius: 24,
+        borderRadius: 20,
         borderWidth: 2,
         shadowOffset: { width: 0, height: 0 },
         shadowRadius: 20,
         shadowOpacity: 0.5,
     },
     iconCircle: {
-        width: 80,
-        height: 80,
         borderRadius: 40,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 20,
+    },
+    textContainerDesktop: {
+        alignItems: 'center',
+    },
+    textContainerMobile: {
+        flex: 1,
     },
     title: {
         color: Colors.text,
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 8,
+    },
+    titleMobile: {
+        fontSize: 20,
+        marginBottom: 4,
     },
     description: {
         color: Colors.textSecondary,
         textAlign: 'center',
         fontSize: 14,
         lineHeight: 20,
+    },
+    descriptionMobile: {
+        textAlign: 'left',
+        fontSize: 13,
+        lineHeight: 18,
     },
 });

@@ -632,7 +632,7 @@ const styles = StyleSheet.create({
     sidebarTitle: { color: Colors.textSecondary, fontSize: 14, fontWeight: 'bold', marginBottom: 20, letterSpacing: 2 },
 
     // Mobile Header
-    mobileHeader: { width: '100%', height: 80, flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.3)', alignItems: 'center' },
+    mobileHeader: { width: '100%', minHeight: 60, maxHeight: 100, flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.3)', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, flexWrap: 'wrap', gap: 6 },
 
     // Leaderboard Items
     lbItem: { flexDirection: 'row', justifyContent: 'space-between', padding: 10, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.05)', marginBottom: 8 },

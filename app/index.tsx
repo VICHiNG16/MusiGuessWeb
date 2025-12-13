@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
     mainContent: { width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 60 }, // Removed flex:1
 
     // Menu
-    menuContainer: { gap: 30, alignItems: 'center' },
+    menuContainer: { gap: 16, alignItems: 'center', width: '100%', maxWidth: 700, paddingHorizontal: 16 },
     modeCard: {
         width: 280,
         height: 280,
