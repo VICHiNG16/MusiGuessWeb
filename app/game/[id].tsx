@@ -191,8 +191,37 @@ export default function GameScreen() {
         if (gameData?.gameState === 'preview') {
             setHasGuessed(false);
             setTimeRemaining(30);
+            setLastScoreResult(null);
         }
     }, [gameData?.currentRound]);
+
+    // Keyboard shortcuts (web only)
+    useEffect(() => {
+        if (Platform.OS !== 'web') return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Don't trigger if in reveal or already guessed
+            if (isReveal || hasGuessed || !currentSong?.options) return;
+
+            // 1-4 keys for answer selection
+            const keyMap: Record<string, number> = { '1': 0, '2': 1, '3': 2, '4': 3 };
+            if (keyMap[e.key] !== undefined) {
+                const option = currentSong.options[keyMap[e.key]];
+                if (option) {
+                    handleGuess(option.trackName);
+                }
+            }
+
+            // Space for play/pause
+            if (e.key === ' ' || e.key === 'Space') {
+                e.preventDefault();
+                toggleMusic();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isReveal, hasGuessed, currentSong, sound, isPlaying]);
 
 
     const toggleMusic = async () => {
@@ -439,6 +468,21 @@ export default function GameScreen() {
 
                 {/* Right: Game Area */}
                 <View style={styles.mainArea}>
+                    {/* Round Progress */}
+                    <View style={styles.roundProgress}>
+                        <Text style={styles.roundText}>
+                            ROUND {(gameData?.currentRound || 0) + 1} / {gameData?.songs?.length || 5}
+                        </Text>
+                        <View style={styles.progressBar}>
+                            <View
+                                style={[
+                                    styles.progressFill,
+                                    { width: `${(((gameData?.currentRound || 0) + 1) / (gameData?.songs?.length || 5)) * 100}%` }
+                                ]}
+                            />
+                        </View>
+                    </View>
+
                     {/* Mobile Timer */}
                     {isMobile && (
                         <View style={styles.mobileTimer}>
@@ -587,5 +631,32 @@ const styles = StyleSheet.create({
     rankRow: { flexDirection: 'row', justifyContent: 'space-between', padding: 15, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 10 },
     rankNum: { color: Colors.textSecondary, fontWeight: 'bold' },
     rankName: { color: Colors.text, fontWeight: 'bold' },
-    rankScore: { color: Colors.primary, fontWeight: '900' }
+    rankScore: { color: Colors.primary, fontWeight: '900' },
+
+    // Round Progress
+    roundProgress: {
+        width: '100%',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    roundText: {
+        fontSize: 14,
+        color: Colors.textSecondary,
+        fontWeight: 'bold',
+        letterSpacing: 2,
+        marginBottom: 8,
+    },
+    progressBar: {
+        width: '80%',
+        maxWidth: 300,
+        height: 4,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 2,
+        overflow: 'hidden',
+    },
+    progressFill: {
+        height: '100%',
+        backgroundColor: Colors.primary,
+        borderRadius: 2,
+    },
 });

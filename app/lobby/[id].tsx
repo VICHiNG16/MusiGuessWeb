@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, Pressable, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { BackgroundGradient } from '../../components/BackgroundGradient';
@@ -21,6 +21,19 @@ export default function LobbyScreen() {
 
     const isSolo = mode === 'solo';
     const currentUid = auth.currentUser?.uid;
+    const [copied, setCopied] = useState(false);
+
+    const copyRoomCode = async () => {
+        if (Platform.OS === 'web') {
+            try {
+                await navigator.clipboard.writeText(id as string);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+            } catch (e) {
+                console.error('Failed to copy:', e);
+            }
+        }
+    };
 
     // Room Logic
     useEffect(() => {
@@ -190,7 +203,21 @@ export default function LobbyScreen() {
             <BackgroundGradient />
             <View style={styles.content}>
                 <Text style={styles.title}>LOBBY</Text>
-                {!isSolo && <Text style={styles.code}>CODE: {id}</Text>}
+                {!isSolo && (
+                    <Pressable onPress={copyRoomCode} style={styles.codeContainer}>
+                        <Text style={styles.code}>CODE: {id}</Text>
+                        <View style={styles.copyButton}>
+                            <Ionicons
+                                name={copied ? "checkmark" : "copy-outline"}
+                                size={18}
+                                color={copied ? Colors.success : Colors.primary}
+                            />
+                            <Text style={[styles.copyText, copied && { color: Colors.success }]}>
+                                {copied ? 'Copied!' : 'Copy'}
+                            </Text>
+                        </View>
+                    </Pressable>
+                )}
 
                 {(roomData.artistImage || artistImage) && (
                     <Image
@@ -272,5 +299,31 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         borderWidth: 2,
         borderColor: 'rgba(255,255,255,0.1)'
-    }
+    },
+    codeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+        marginBottom: 30,
+        padding: 12,
+        paddingHorizontal: 20,
+        backgroundColor: 'rgba(0, 243, 255, 0.1)',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(0, 243, 255, 0.3)',
+    },
+    copyButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        padding: 8,
+        paddingHorizontal: 12,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 8,
+    },
+    copyText: {
+        fontSize: 14,
+        color: Colors.primary,
+        fontWeight: 'bold',
+    },
 });
