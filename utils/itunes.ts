@@ -96,7 +96,7 @@ export async function searchArtists(query: string) {
                         artistId: r.artistId,
                         artistName: r.artistName,
                         primaryGenreName: r.primaryGenreName,
-                        image: r.artworkUrl100
+                        image: r.artworkUrl100?.replace('100x100', '600x600')
                     });
                 }
             });
