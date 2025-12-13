@@ -8,7 +8,7 @@ import { Colors } from '../constants/Colors';
 import { searchArtists } from '../utils/itunes';
 import { Ionicons } from '@expo/vector-icons';
 import { SettingsModal } from '../components/SettingsModal';
-import Animated, { FadeIn, FadeOut, SlideInRight, SlideInLeft, FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, SlideInRight, SlideInLeft } from 'react-native-reanimated';
 
 type ViewMode = 'MENU' | 'SINGLE' | 'MULTI';
 
@@ -21,20 +21,30 @@ export default function HomeScreen() {
     const [gameCode, setGameCode] = useState('');
     const [artistQuery, setArtistQuery] = useState('');
     const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
-    const [selectedArtistImage, setSelectedArtistImage] = useState<string | null>(null);
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [searching, setSearching] = useState(false);
     const [settingsVisible, setSettingsVisible] = useState(false);
+
     const [cookieAccepted, setCookieAccepted] = useState(false);
 
+    // Debounce search
     useEffect(() => {
-        // Check local storage for cookie consent (mock for now, or true session)
-        // For now, just show it every time or simple state
-    }, []);
+        const timer = setTimeout(async () => {
+            if (artistQuery.length >= 2 && !selectedArtist) {
+                setSearching(true);
+                const results = await searchArtists(artistQuery);
+                setSearchResults(results as any[]);
+                setSearching(false);
+            } else if (artistQuery.length === 0) {
+                setSearchResults([]);
+                setSelectedArtist(null);
+            }
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [artistQuery, selectedArtist]);
 
-    const selectArtist = (name: string, image: string) => {
+    const selectArtist = (name: string) => {
         setSelectedArtist(name);
-        setSelectedArtistImage(image);
         setArtistQuery(name);
         setSearchResults([]);
     };
@@ -43,7 +53,7 @@ export default function HomeScreen() {
         if (!selectedArtist) return;
         const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
         const isSolo = viewMode === 'SINGLE';
-        router.push(`/lobby/${roomId}?isHost=true&mode=${isSolo ? 'solo' : 'multi'}&artist=${encodeURIComponent(selectedArtist)}&artistImage=${encodeURIComponent(selectedArtistImage || '')}`);
+        router.push(`/lobby/${roomId}?isHost=true&mode=${isSolo ? 'solo' : 'multi'}&artist=${encodeURIComponent(selectedArtist)}`);
     };
 
     const joinRoom = () => {
@@ -51,57 +61,6 @@ export default function HomeScreen() {
             router.push(`/lobby/${gameCode}?isHost=false`);
         }
     };
-
-    const renderCookieBanner = () => (
-        !cookieAccepted && (
-            <Animated.View entering={FadeInUp.delay(1000)} style={styles.cookieBanner}>
-                <Text style={styles.cookieText}>
-                    We use cookies to personalize content and ads, to provide social media features and to analyze our traffic.
-                    By using our site, you consent to our privacy policy.
-                </Text>
-                <GlassButton
-                    title="Accept"
-                    onPress={() => setCookieAccepted(true)}
-                    style={{ height: 40, width: 100 }}
-                    textStyle={{ fontSize: 14 }}
-                />
-            </Animated.View>
-        )
-    );
-
-    const renderFAQ = () => (
-        <View style={styles.faqContainer}>
-            <Text style={styles.aboutSubtitle}>Frequently Asked Questions</Text>
-
-            <View style={styles.faqItem}>
-                <Text style={styles.faqQuestion}>Is MusiGuess free to play?</Text>
-                <Text style={styles.faqAnswer}>Yes! MusiGuess is 100% free. You can play unlimited rounds locally or with friends.</Text>
-            </View>
-
-            <View style={styles.faqItem}>
-                <Text style={styles.faqQuestion}>Do I need an Apple Music subscription?</Text>
-                <Text style={styles.faqAnswer}>No. We use 30-second previews provided by iTunes which are free for everyone. If you want to listen to the full song, we provide a link to Apple Music.</Text>
-            </View>
-
-            <View style={styles.faqItem}>
-                <Text style={styles.faqQuestion}>Can I play with friends?</Text>
-                <Text style={styles.faqAnswer}>Absolutely. Choose "Multiplayer", share the 6-digit room code with your friends, and see who knows their music best!</Text>
-            </View>
-        </View>
-    );
-
-    const renderHeader = () => (
-        <View style={styles.header}>
-            <Text style={[styles.title, isMobile && { fontSize: 42, letterSpacing: 4 }]}>MUSIGUESS</Text>
-            <Text style={styles.subtitle}>LIVE</Text>
-            {viewMode !== 'MENU' && (
-                <Pressable onPress={() => setViewMode('MENU')} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={Colors.textSecondary} />
-                    <Text style={styles.backText}>Back to Menu</Text>
-                </Pressable>
-            )}
-        </View>
-    );
 
     const renderMenu = () => (
         <Animated.View entering={FadeIn} exiting={FadeOut} style={[styles.menuContainer, { flexDirection: isMobile ? 'column' : 'row' }]}>
@@ -146,7 +105,7 @@ export default function HomeScreen() {
                         <Pressable
                             key={item.artistId}
                             style={styles.dropdownItem}
-                            onPress={() => selectArtist(item.artistName, item.image)}
+                            onPress={() => selectArtist(item.artistName)}
                         >
                             {item.image && (
                                 <Image source={{ uri: item.image }} style={styles.artistImage} />
@@ -194,6 +153,44 @@ export default function HomeScreen() {
         </Animated.View>
     );
 
+    const renderCookieBanner = () => (
+        !cookieAccepted && (
+            <Animated.View entering={FadeIn.delay(1000)} style={styles.cookieBanner}>
+                <Text style={styles.cookieText}>
+                    We use cookies to personalize content and ads, to provide social media features and to analyze our traffic.
+                    By using our site, you consent to our privacy policy.
+                </Text>
+                <GlassButton
+                    title="Accept"
+                    onPress={() => setCookieAccepted(true)}
+                    style={{ height: 40, width: 100 }}
+                    textStyle={{ fontSize: 14 }}
+                />
+            </Animated.View>
+        )
+    );
+
+    const renderFAQ = () => (
+        <View style={styles.faqContainer}>
+            <Text style={styles.aboutSubtitle}>Frequently Asked Questions</Text>
+
+            <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Is MusiGuess free to play?</Text>
+                <Text style={styles.faqAnswer}>Yes! MusiGuess is 100% free. You can play unlimited rounds locally or with friends.</Text>
+            </View>
+
+            <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Do I need an Apple Music subscription?</Text>
+                <Text style={styles.faqAnswer}>No. We use 30-second previews provided by iTunes which are free for everyone. If you want to listen to the full song, we provide a link to Apple Music.</Text>
+            </View>
+
+            <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Can I play with friends?</Text>
+                <Text style={styles.faqAnswer}>Absolutely. Choose "Multiplayer", share the 6-digit room code with your friends, and see who knows their music best!</Text>
+            </View>
+        </View>
+    );
+
     const renderAbout = () => (
         <View style={styles.aboutContainer}>
             <Text style={styles.aboutTitle}>About MusiGuess</Text>
@@ -226,6 +223,21 @@ export default function HomeScreen() {
             <Text style={styles.copyright}>© 2025 MusiGuess. All rights reserved.</Text>
         </View>
     );
+
+    const renderHeader = () => (
+        <View style={styles.header}>
+            <Text style={styles.title}>MUSI</Text>
+            <Text style={styles.subtitle}>GUESS</Text>
+            {viewMode !== 'MENU' && (
+                <Pressable onPress={() => setViewMode('MENU')} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={Colors.textSecondary} />
+                    <Text style={styles.backText}>Back to Menu</Text>
+                </Pressable>
+            )}
+        </View>
+    );
+
+    // ... (Keep existing Renders) ...
 
     return (
         <View style={styles.container}>
@@ -283,7 +295,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    content: { flex: 1 },
+    content: { flex: 1 }, // Changed from padding: 24 to full width
     scrollContent: {
         alignItems: 'center',
         paddingVertical: 40,
@@ -299,8 +311,7 @@ const styles = StyleSheet.create({
         textShadowColor: Colors.primary,
         textShadowOffset: { width: 0, height: 0 },
         textShadowRadius: 30,
-        marginBottom: -10,
-        textAlign: 'center'
+        marginBottom: -10
     },
     subtitle: {
         fontSize: 16,
@@ -312,7 +323,7 @@ const styles = StyleSheet.create({
     backButton: { flexDirection: 'row', alignItems: 'center', marginTop: 20, gap: 8 },
     backText: { color: Colors.textSecondary, fontSize: 16 },
 
-    mainContent: { width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 60 },
+    mainContent: { width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 60 }, // Removed flex:1
 
     // Menu
     menuContainer: { gap: 30, alignItems: 'center' },
@@ -326,7 +337,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 24,
-        cursor: 'pointer' // Web only property
+        cursor: 'pointer'
     },
     iconCircle: {
         width: 80, height: 80, borderRadius: 40,
@@ -377,7 +388,7 @@ const styles = StyleSheet.create({
     dropdownTitle: { color: Colors.text, fontSize: 16, fontWeight: 'bold' },
     dropdownSubtitle: { color: Colors.textSecondary, fontSize: 12 },
 
-    // About & Footer
+    // About & Footer & Cookie
     aboutContainer: {
         width: '100%',
         maxWidth: 800,
@@ -472,3 +483,4 @@ const styles = StyleSheet.create({
         opacity: 0.6
     }
 });
+
