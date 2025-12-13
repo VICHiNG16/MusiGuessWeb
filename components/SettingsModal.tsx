@@ -2,6 +2,7 @@ import { Modal, View, Text, StyleSheet, Switch, Pressable, Linking } from 'react
 import { BlurView } from 'expo-blur';
 import { Colors } from '../constants/Colors';
 import { GlassButton } from './GlassButton';
+import { useSettings } from '../context/SettingsContext';
 
 interface Props {
     visible: boolean;
@@ -9,6 +10,8 @@ interface Props {
 }
 
 export function SettingsModal({ visible, onClose }: Props) {
+    const { soundEnabled, hapticsEnabled, toggleSound, toggleHaptics } = useSettings();
+
     return (
         <Modal
             animationType="fade"
@@ -24,7 +27,8 @@ export function SettingsModal({ visible, onClose }: Props) {
                     <View style={styles.row}>
                         <Text style={styles.label}>Sound Effects</Text>
                         <Switch
-                            value={true}
+                            value={soundEnabled}
+                            onValueChange={toggleSound}
                             trackColor={{ false: "#767577", true: Colors.primary }}
                             thumbColor={"#f4f3f4"}
                         />
@@ -33,7 +37,8 @@ export function SettingsModal({ visible, onClose }: Props) {
                     <View style={styles.row}>
                         <Text style={styles.label}>Haptic Feedback</Text>
                         <Switch
-                            value={true}
+                            value={hapticsEnabled}
+                            onValueChange={toggleHaptics}
                             trackColor={{ false: "#767577", true: Colors.primary }}
                             thumbColor={"#f4f3f4"}
                         />

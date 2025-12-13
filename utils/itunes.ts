@@ -4,6 +4,20 @@ export interface Song {
     artistName: string;
     previewUrl: string;
     artworkUrl100: string;
+    trackViewUrl: string;
+}
+
+// Apple Affiliate Token
+// NOTE: The Apple Performance Partners Program is currently very selective. 
+// You can leave this blank. The link will still work fine for users (and is good for copyright compliance).
+// If you are approved later, paste your token here.
+const AFFILIATE_TOKEN = '';
+
+function appendAffiliateToken(url: string): string {
+    if (!url) return url;
+    if (!AFFILIATE_TOKEN) return url;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}at=${AFFILIATE_TOKEN}`;
 }
 
 export async function fetchMusicData(artist: string): Promise<Song[]> {
@@ -20,6 +34,7 @@ export async function fetchMusicData(artist: string): Promise<Song[]> {
             artistName: s.artistName,
             previewUrl: s.previewUrl,
             artworkUrl100: s.artworkUrl100.replace('100x100', '600x600'), // Get higher quality art
+            trackViewUrl: appendAffiliateToken(s.trackViewUrl),
         }));
     } catch (error) {
         console.error("Error fetching music data:", error);

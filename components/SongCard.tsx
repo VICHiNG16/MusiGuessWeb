@@ -10,9 +10,10 @@ interface SongCardProps {
     title: string;
     artwork: string;
     disabled?: boolean;
+    style?: any;
 }
 
-export function SongCard({ onPress, title, artwork, disabled }: SongCardProps) {
+export function SongCard({ onPress, title, artwork, disabled, style }: SongCardProps) {
     const scale = useSharedValue(1);
 
     const animatedStyle = useAnimatedStyle(() => ({
@@ -33,7 +34,7 @@ export function SongCard({ onPress, title, artwork, disabled }: SongCardProps) {
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
             disabled={disabled}
-            style={[styles.container, animatedStyle, disabled && styles.disabled]}
+            style={[styles.container, style, animatedStyle, disabled && styles.disabled]}
         >
             <Image source={{ uri: artwork }} style={styles.image} />
             <BlurView intensity={40} tint="dark" style={styles.labelContainer}>

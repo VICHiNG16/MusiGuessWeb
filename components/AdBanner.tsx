@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, Text, Platform, StyleSheet } from 'react-native';
 
-const AD_CLIENT_ID = process.env.EXPO_PUBLIC_ADSENSE_CLIENT_ID || "ca-pub-0000000000000000"; // Placeholder
+const AD_CLIENT_ID = process.env.EXPO_PUBLIC_ADSENSE_CLIENT_ID || "ca-pub-9555506877953640";
 const AD_SLOT_ID = process.env.EXPO_PUBLIC_ADSENSE_SLOT_ID || "1234567890"; // Placeholder
 
 export function AdBanner({ style }: { style?: any }) {

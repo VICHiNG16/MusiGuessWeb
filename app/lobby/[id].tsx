@@ -127,11 +127,15 @@ export default function LobbyScreen() {
                 const correct = {
                     trackName: song.trackName,
                     artworkUrl100: song.artworkUrl100,
-                    trackId: song.trackId
+                    trackId: song.trackId,
+                    trackViewUrl: song.trackViewUrl // Include affiliate link
                 };
 
                 const options = [...wrong, correct].sort(() => 0.5 - Math.random());
-                return { ...song, options };
+                return {
+                    ...song, // This already includes trackViewUrl from fetchMusicData map
+                    options
+                };
             });
 
             await update(ref(db, `rooms/${id}`), {
