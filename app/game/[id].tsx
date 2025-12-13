@@ -555,20 +555,20 @@ export default function GameScreen() {
                                 <Text style={styles.artistName}>{currentSong.artistName}</Text>
 
                                 {/* New Speed Badge & Streak Row */}
-                                <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginTop: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+                                <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch', marginTop: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
                                     {lastScoreResult && (
                                         <SpeedBadge
                                             tier={lastScoreResult.speedTier}
                                             points={lastScoreResult.totalPoints}
                                             visible={lastScoreResult.totalPoints > 0}
-                                            style={{ minWidth: 140 }}
+                                            style={{ minWidth: 140, flex: 1 }}
                                         />
                                     )}
 
                                     <StreakCounter
                                         streak={streak}
                                         visible={streak > 0}
-                                        style={{ minWidth: 100, marginTop: 0 }}
+                                        style={{ minWidth: 100, marginTop: 0, flex: 1 }}
                                     />
                                 </View>
 

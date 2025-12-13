@@ -50,6 +50,8 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         borderWidth: 2,
         gap: 12,
+        width: '100%',
+        height: '100%',
     },
     emoji: {
         fontSize: 32,

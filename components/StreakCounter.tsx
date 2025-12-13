@@ -89,6 +89,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.primary,
         minWidth: 100,
+        width: '100%',
+        height: '100%',
     },
     onFire: {
         backgroundColor: 'rgba(255, 107, 53, 0.15)',
