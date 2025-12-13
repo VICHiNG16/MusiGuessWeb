@@ -10,8 +10,17 @@ export interface Song {
 
 export async function fetchMusicData(artist: string): Promise<Song[]> {
     try {
-        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&entity=song&limit=50`);
-        const data = await response.json();
+        let data;
+        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&entity=song&limit=50`;
+
+        if (Platform.OS === 'web') {
+            data = await jsonp(url);
+        } else {
+            const response = await fetch(url);
+            data = await response.json();
+        }
+
+        if (!data || !data.results) return [];
 
         // Filter out songs without previewUrl
         const songs = data.results.filter((s: any) => s.previewUrl && s.kind === 'song');
@@ -22,6 +31,7 @@ export async function fetchMusicData(artist: string): Promise<Song[]> {
             artistName: s.artistName,
             previewUrl: s.previewUrl,
             artworkUrl100: s.artworkUrl100.replace('100x100', '600x600'), // Get higher quality art
+            trackViewUrl: s.trackViewUrl
         }));
     } catch (error) {
         console.error("Error fetching music data:", error);
