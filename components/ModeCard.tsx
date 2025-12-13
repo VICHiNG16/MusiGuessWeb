@@ -36,28 +36,28 @@ export function ModeCard({ title, description, icon, iconColor, onPress }: ModeC
     }));
 
     const handlePressIn = () => {
-        scale.value = withSpring(0.97, { damping: 15 });
+        scale.value = withSpring(0.97, { damping: 20, stiffness: 300 });
         glowOpacity.value = withTiming(1, { duration: 100 });
     };
 
     const handlePressOut = () => {
-        scale.value = withSpring(1, { damping: 12 });
+        scale.value = withSpring(1, { damping: 20, stiffness: 300 });
         glowOpacity.value = withTiming(0, { duration: 200 });
     };
 
     const handleHoverIn = () => {
         if (Platform.OS === 'web') {
-            scale.value = withSpring(1.03, { damping: 15 });
-            translateY.value = withSpring(-5, { damping: 15 });
-            glowOpacity.value = withTiming(0.6, { duration: 200 });
+            scale.value = withSpring(1.03, { damping: 20, stiffness: 300 });
+            translateY.value = withSpring(-5, { damping: 20, stiffness: 300 });
+            glowOpacity.value = withTiming(0.6, { duration: 150 });
         }
     };
 
     const handleHoverOut = () => {
         if (Platform.OS === 'web') {
-            scale.value = withSpring(1, { damping: 12 });
-            translateY.value = withSpring(0, { damping: 12 });
-            glowOpacity.value = withTiming(0, { duration: 200 });
+            scale.value = withSpring(1, { damping: 20, stiffness: 300 });
+            translateY.value = withSpring(0, { damping: 20, stiffness: 300 });
+            glowOpacity.value = withTiming(0, { duration: 150 });
         }
     };
 
