@@ -4,8 +4,8 @@ import { Colors } from '../constants/Colors';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
-    withSpring,
-    withTiming
+    withTiming,
+    Easing,
 } from 'react-native-reanimated';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -25,6 +25,9 @@ const VARIANT_COLORS = {
     success: { bg: 'rgba(76, 175, 80, 0.15)', border: Colors.success },
     danger: { bg: 'rgba(244, 67, 54, 0.15)', border: Colors.error },
 };
+
+// Smooth easing for no-bounce effect
+const SMOOTH_EASING = Easing.out(Easing.cubic);
 
 export function GlassButton({
     onPress,
@@ -49,29 +52,29 @@ export function GlassButton({
 
     const handlePressIn = () => {
         if (!disabled) {
-            scale.value = withSpring(0.95, { damping: 15 });
+            scale.value = withTiming(0.96, { duration: 100, easing: SMOOTH_EASING });
             glowIntensity.value = withTiming(0.8, { duration: 100 });
         }
     };
 
     const handlePressOut = () => {
         if (!disabled) {
-            scale.value = withSpring(1, { damping: 12 });
-            glowIntensity.value = withTiming(0, { duration: 200 });
+            scale.value = withTiming(1, { duration: 120, easing: SMOOTH_EASING });
+            glowIntensity.value = withTiming(0, { duration: 150 });
         }
     };
 
     const handleHoverIn = () => {
         if (!disabled && Platform.OS === 'web') {
-            scale.value = withSpring(1.02, { damping: 15 });
-            glowIntensity.value = withTiming(0.5, { duration: 150 });
+            scale.value = withTiming(1.02, { duration: 120, easing: SMOOTH_EASING });
+            glowIntensity.value = withTiming(0.5, { duration: 120 });
         }
     };
 
     const handleHoverOut = () => {
         if (!disabled && Platform.OS === 'web') {
-            scale.value = withSpring(1, { damping: 12 });
-            glowIntensity.value = withTiming(0, { duration: 200 });
+            scale.value = withTiming(1, { duration: 120, easing: SMOOTH_EASING });
+            glowIntensity.value = withTiming(0, { duration: 150 });
         }
     };
 

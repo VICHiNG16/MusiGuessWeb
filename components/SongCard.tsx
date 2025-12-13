@@ -4,9 +4,8 @@ import { Colors } from '../constants/Colors';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
-    withSpring,
     withTiming,
-    interpolateColor
+    Easing,
 } from 'react-native-reanimated';
 import { useState } from 'react';
 
@@ -19,6 +18,9 @@ interface SongCardProps {
     disabled?: boolean;
     style?: any;
 }
+
+// Smooth easing for no-bounce effect
+const SMOOTH_EASING = Easing.out(Easing.cubic);
 
 export function SongCard({ onPress, title, artwork, disabled, style }: SongCardProps) {
     const scale = useSharedValue(1);
@@ -35,29 +37,29 @@ export function SongCard({ onPress, title, artwork, disabled, style }: SongCardP
 
     const handlePressIn = () => {
         if (!disabled) {
-            scale.value = withSpring(0.95, { damping: 15 });
-            glowOpacity.value = withTiming(1, { duration: 150 });
+            scale.value = withTiming(0.96, { duration: 100, easing: SMOOTH_EASING });
+            glowOpacity.value = withTiming(1, { duration: 100 });
         }
     };
 
     const handlePressOut = () => {
         if (!disabled) {
-            scale.value = withSpring(1, { damping: 12 });
-            glowOpacity.value = withTiming(0, { duration: 200 });
+            scale.value = withTiming(1, { duration: 120, easing: SMOOTH_EASING });
+            glowOpacity.value = withTiming(0, { duration: 150 });
         }
     };
 
     const handleHoverIn = () => {
         if (!disabled && Platform.OS === 'web') {
-            scale.value = withSpring(1.02, { damping: 15 });
-            glowOpacity.value = withTiming(0.6, { duration: 200 });
+            scale.value = withTiming(1.02, { duration: 120, easing: SMOOTH_EASING });
+            glowOpacity.value = withTiming(0.6, { duration: 120 });
         }
     };
 
     const handleHoverOut = () => {
         if (!disabled && Platform.OS === 'web') {
-            scale.value = withSpring(1, { damping: 12 });
-            glowOpacity.value = withTiming(0, { duration: 200 });
+            scale.value = withTiming(1, { duration: 120, easing: SMOOTH_EASING });
+            glowOpacity.value = withTiming(0, { duration: 150 });
         }
     };
 

@@ -2,11 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
     useAnimatedStyle,
-    withSpring,
-    withSequence,
     withTiming,
     useSharedValue,
-    FadeIn
+    FadeIn,
+    Easing,
 } from 'react-native-reanimated';
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,16 +16,19 @@ interface StreakCounterProps {
     visible: boolean;
 }
 
+// Smooth easing for no-bounce effect
+const SMOOTH_EASING = Easing.out(Easing.cubic);
+
 export function StreakCounter({ streak, visible }: StreakCounterProps) {
     const scale = useSharedValue(1);
 
     useEffect(() => {
         if (streak > 0) {
-            // Pulse animation on streak increase
-            scale.value = withSequence(
-                withSpring(1.2, { damping: 5 }),
-                withSpring(1, { damping: 8 })
-            );
+            // Quick pulse animation on streak increase (no bounce)
+            scale.value = withTiming(1.15, { duration: 100, easing: SMOOTH_EASING });
+            setTimeout(() => {
+                scale.value = withTiming(1, { duration: 150, easing: SMOOTH_EASING });
+            }, 100);
         }
     }, [streak]);
 
@@ -41,7 +43,7 @@ export function StreakCounter({ streak, visible }: StreakCounterProps) {
 
     return (
         <Animated.View
-            entering={FadeIn}
+            entering={FadeIn.duration(200)}
             style={[
                 styles.container,
                 animatedStyle,
@@ -53,9 +55,9 @@ export function StreakCounter({ streak, visible }: StreakCounterProps) {
                 {isLegendary ? (
                     <Text style={styles.legendaryEmoji}>🏆</Text>
                 ) : isOnFire ? (
-                    <Ionicons name="flame" size={20} color={Colors.fast} />
+                    <Ionicons name="flame" size={18} color={Colors.fast} />
                 ) : (
-                    <Ionicons name="flash" size={20} color={Colors.primary} />
+                    <Ionicons name="flash" size={18} color={Colors.primary} />
                 )}
             </View>
             <Text style={[
@@ -76,12 +78,13 @@ export function StreakCounter({ streak, visible }: StreakCounterProps) {
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        padding: 12,
+        padding: 10,
+        paddingHorizontal: 14,
         backgroundColor: 'rgba(0, 243, 255, 0.1)',
-        borderRadius: 12,
+        borderRadius: 10,
         borderWidth: 1,
         borderColor: Colors.primary,
-        minWidth: 80,
+        marginTop: 16,
     },
     onFire: {
         backgroundColor: 'rgba(255, 107, 53, 0.15)',
@@ -92,13 +95,13 @@ const styles = StyleSheet.create({
         borderColor: Colors.lightning,
     },
     iconContainer: {
-        marginBottom: 4,
+        marginBottom: 2,
     },
     legendaryEmoji: {
-        fontSize: 20,
+        fontSize: 18,
     },
     count: {
-        fontSize: 28,
+        fontSize: 22,
         fontWeight: '900',
         color: Colors.primary,
     },
@@ -109,15 +112,15 @@ const styles = StyleSheet.create({
         color: Colors.lightning,
     },
     label: {
-        fontSize: 10,
+        fontSize: 9,
         fontWeight: 'bold',
         color: Colors.textSecondary,
         letterSpacing: 1,
     },
     bonus: {
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: 'bold',
         color: Colors.success,
-        marginTop: 4,
+        marginTop: 2,
     },
 });

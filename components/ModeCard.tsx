@@ -3,8 +3,8 @@ import { Pressable, Text, StyleSheet, View, Platform } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
-    withSpring,
     withTiming,
+    Easing,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
@@ -18,6 +18,9 @@ interface ModeCardProps {
     iconColor: string;
     onPress: () => void;
 }
+
+// Smooth easing for no-bounce effect
+const SMOOTH_EASING = Easing.out(Easing.cubic);
 
 export function ModeCard({ title, description, icon, iconColor, onPress }: ModeCardProps) {
     const scale = useSharedValue(1);
@@ -36,27 +39,27 @@ export function ModeCard({ title, description, icon, iconColor, onPress }: ModeC
     }));
 
     const handlePressIn = () => {
-        scale.value = withSpring(0.97, { damping: 20, stiffness: 300 });
+        scale.value = withTiming(0.97, { duration: 120, easing: SMOOTH_EASING });
         glowOpacity.value = withTiming(1, { duration: 100 });
     };
 
     const handlePressOut = () => {
-        scale.value = withSpring(1, { damping: 20, stiffness: 300 });
-        glowOpacity.value = withTiming(0, { duration: 200 });
+        scale.value = withTiming(1, { duration: 150, easing: SMOOTH_EASING });
+        glowOpacity.value = withTiming(0, { duration: 150 });
     };
 
     const handleHoverIn = () => {
         if (Platform.OS === 'web') {
-            scale.value = withSpring(1.03, { damping: 20, stiffness: 300 });
-            translateY.value = withSpring(-5, { damping: 20, stiffness: 300 });
+            scale.value = withTiming(1.02, { duration: 150, easing: SMOOTH_EASING });
+            translateY.value = withTiming(-4, { duration: 150, easing: SMOOTH_EASING });
             glowOpacity.value = withTiming(0.6, { duration: 150 });
         }
     };
 
     const handleHoverOut = () => {
         if (Platform.OS === 'web') {
-            scale.value = withSpring(1, { damping: 20, stiffness: 300 });
-            translateY.value = withSpring(0, { damping: 20, stiffness: 300 });
+            scale.value = withTiming(1, { duration: 150, easing: SMOOTH_EASING });
+            translateY.value = withTiming(0, { duration: 150, easing: SMOOTH_EASING });
             glowOpacity.value = withTiming(0, { duration: 150 });
         }
     };
