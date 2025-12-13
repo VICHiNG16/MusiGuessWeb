@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, ActivityIndicator, FlatList, useWindowDimensions, Linking, Vibration } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator, FlatList, useWindowDimensions, Linking, Vibration, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import { Audio } from 'expo-av';
@@ -30,6 +30,7 @@ export default function GameScreen() {
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [hasGuessed, setHasGuessed] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [volume, setVolume] = useState(1.0); // 0.0 to 1.0
 
     // Derived State
     const isReveal = gameData?.gameState === 'reveal';
@@ -40,7 +41,9 @@ export default function GameScreen() {
     // Initial Data Load
     useEffect(() => {
         const roomRef = ref(db, `rooms/${id}`);
+        // ... (rest of initial load, omitting to focus on changes) ...
         const unsub = onValue(roomRef, (snapshot) => {
+            // ... existing logic ...
             const data = snapshot.val();
             if (data) {
                 setGameData(data);
@@ -78,6 +81,13 @@ export default function GameScreen() {
         }).catch(err => console.log("Audio Config Error", err));
     }, []);
 
+    // Volume Effect
+    useEffect(() => {
+        if (sound) {
+            sound.setVolumeAsync(volume);
+        }
+    }, [volume, sound]);
+
     // 2. Music Player Effect (Consolidated)
     useEffect(() => {
         let currentSound: Audio.Sound | null = null;
@@ -95,7 +105,7 @@ export default function GameScreen() {
                     // Create NEW sound, but DO NOT auto-play in creation (better control)
                     const { sound: newSound } = await Audio.Sound.createAsync(
                         { uri: currentSong.previewUrl },
-                        { shouldPlay: false, isLooping: true }
+                        { shouldPlay: false, isLooping: true, volume: volume }
                     );
 
                     if (isMounted) {
@@ -382,6 +392,23 @@ export default function GameScreen() {
                         <View style={{ marginTop: 20, alignItems: 'center' }}>
                             <Text style={styles.timer}>{timeRemaining}</Text>
                             <Text style={{ color: Colors.textSecondary }}>SECONDS</Text>
+
+                            {/* Volume Slider for Desktop */}
+                            {Platform.OS === 'web' && (
+                                <View style={{ marginTop: 30, width: '100%', paddingHorizontal: 10 }}>
+                                    <Text style={{ color: Colors.textSecondary, marginBottom: 5, fontSize: 12, fontWeight: 'bold' }}>VOLUME</Text>
+                                    {/* @ts-ignore */}
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.05"
+                                        value={volume}
+                                        onChange={(e: any) => setVolume(parseFloat(e.target.value))}
+                                        style={{ width: '100%', accentColor: Colors.primary, cursor: 'pointer' }}
+                                    />
+                                </View>
+                            )}
                         </View>
                     )}
                 </View>

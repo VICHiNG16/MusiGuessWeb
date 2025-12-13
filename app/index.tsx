@@ -21,6 +21,7 @@ export default function HomeScreen() {
     const [gameCode, setGameCode] = useState('');
     const [artistQuery, setArtistQuery] = useState('');
     const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
+    const [selectedArtistImage, setSelectedArtistImage] = useState<string | null>(null);
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [searching, setSearching] = useState(false);
     const [settingsVisible, setSettingsVisible] = useState(false);
@@ -36,13 +37,15 @@ export default function HomeScreen() {
             } else if (artistQuery.length === 0) {
                 setSearchResults([]);
                 setSelectedArtist(null);
+                setSelectedArtistImage(null);
             }
         }, 500);
         return () => clearTimeout(timer);
     }, [artistQuery, selectedArtist]);
 
-    const selectArtist = (name: string) => {
+    const selectArtist = (name: string, image: string) => {
         setSelectedArtist(name);
+        setSelectedArtistImage(image);
         setArtistQuery(name);
         setSearchResults([]);
     };
@@ -51,7 +54,7 @@ export default function HomeScreen() {
         if (!selectedArtist) return;
         const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
         const isSolo = viewMode === 'SINGLE';
-        router.push(`/lobby/${roomId}?isHost=true&mode=${isSolo ? 'solo' : 'multi'}&artist=${encodeURIComponent(selectedArtist)}`);
+        router.push(`/lobby/${roomId}?isHost=true&mode=${isSolo ? 'solo' : 'multi'}&artist=${encodeURIComponent(selectedArtist)}&artistImage=${encodeURIComponent(selectedArtistImage || '')}`);
     };
 
     const joinRoom = () => {
@@ -116,7 +119,7 @@ export default function HomeScreen() {
                         <Pressable
                             key={item.artistId}
                             style={styles.dropdownItem}
-                            onPress={() => selectArtist(item.artistName)}
+                            onPress={() => selectArtist(item.artistName, item.image)}
                         >
                             {item.image && (
                                 <Image source={{ uri: item.image }} style={styles.artistImage} />
