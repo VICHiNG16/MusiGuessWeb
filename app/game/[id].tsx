@@ -10,9 +10,15 @@ import { db, auth } from '../../utils/firebaseConfig';
 import Animated, { FadeIn, ZoomIn, FadeInUp, Layout } from 'react-native-reanimated';
 import { ScoreTicker } from '../../components/ScoreTicker';
 import { SongCard } from '../../components/SongCard';
+import { SpeedBadge } from '../../components/SpeedBadge';
+import { StreakCounter } from '../../components/StreakCounter';
+import { Confetti } from '../../components/Confetti';
 import { Ionicons } from '@expo/vector-icons';
 import { AdBanner } from '../../components/AdBanner';
 import { useSettings } from '../../context/SettingsContext';
+import { calculateScore, calculateWrongScore, SPEED_TIER_INFO } from '../../utils/scoring';
+import { ScoreResult, SpeedTier } from '../../types';
+import { addHighScore } from '../../utils/storage';
 
 export default function GameScreen() {
     const { id, mode } = useLocalSearchParams();
@@ -30,7 +36,12 @@ export default function GameScreen() {
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [hasGuessed, setHasGuessed] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [volume, setVolume] = useState(1.0); // 0.0 to 1.0
+    const [volume, setVolume] = useState(1.0);
+
+    // New Scoring State
+    const [streak, setStreak] = useState(0);
+    const [lastScoreResult, setLastScoreResult] = useState<ScoreResult | null>(null);
+    const [showConfetti, setShowConfetti] = useState(false);
 
     // Derived State
     const isReveal = gameData?.gameState === 'reveal';
@@ -201,23 +212,35 @@ export default function GameScreen() {
         if (hasGuessed || isReveal || !currentUid) return;
 
         if (hapticsEnabled) {
-            Vibration.vibrate(10); // Short tick
+            Vibration.vibrate(10);
         }
 
         setHasGuessed(true);
         const isCorrect = selectedTitle === currentSong.trackName;
 
-        // Calc score (Exponential Decay: Fast drop start, slow tail)
-        // Max 100, Min ~10 after 30s
+        // New tiered scoring system
         const elapsed = 30 - timeRemaining;
-        const decayFactor = 0.08;
-        const points = isCorrect ? Math.round(100 * Math.exp(-decayFactor * elapsed)) : 0;
+        let scoreResult: ScoreResult;
 
-        // Push Guess
+        if (isCorrect) {
+            scoreResult = calculateScore(elapsed, streak, gameData?.difficulty || 'normal');
+            setStreak(prev => prev + 1);
+            setShowConfetti(true);
+            setTimeout(() => setShowConfetti(false), 3000);
+        } else {
+            scoreResult = calculateWrongScore();
+            setStreak(0);
+        }
+
+        setLastScoreResult(scoreResult);
+
+        // Push Guess with new scoring data
         await update(ref(db, `rooms/${id}/roundState/guesses/${currentUid}`), {
             guess: selectedTitle,
-            scoreDelta: points,
-            isCorrect
+            scoreDelta: scoreResult.totalPoints,
+            isCorrect,
+            speedTier: scoreResult.speedTier,
+            streakBonus: scoreResult.streakBonus,
         });
     };
 
@@ -376,6 +399,7 @@ export default function GameScreen() {
     return (
         <View style={styles.container}>
             <BackgroundGradient />
+            <Confetti active={showConfetti} />
 
             <View style={{ flex: 1, flexDirection: isMobile ? 'column' : 'row' }}>
                 {/* Left: Leaderboard (Desktop) or Top (Mobile) */}
@@ -431,9 +455,24 @@ export default function GameScreen() {
                             <Text style={styles.songTitle}>{currentSong.trackName}</Text>
                             <Text style={styles.artistName}>{currentSong.artistName}</Text>
 
-                            <Animated.Text entering={ZoomIn.delay(300)} style={[styles.deltaScore, { color: (gameData.roundState?.guesses?.[currentUid || '']?.scoreDelta > 0) ? Colors.success : Colors.error }]}>
-                                {(gameData.roundState?.guesses?.[currentUid || '']?.scoreDelta > 0) ? `+${gameData.roundState?.guesses?.[currentUid || '']?.scoreDelta}` : "MISS"}
-                            </Animated.Text>
+                            {/* New Speed Badge */}
+                            {lastScoreResult && (
+                                <SpeedBadge
+                                    tier={lastScoreResult.speedTier}
+                                    points={lastScoreResult.totalPoints}
+                                    visible={lastScoreResult.totalPoints > 0}
+                                />
+                            )}
+
+                            {/* Score display for wrong answer */}
+                            {lastScoreResult && lastScoreResult.totalPoints === 0 && (
+                                <Animated.Text entering={ZoomIn.delay(300)} style={[styles.deltaScore, { color: Colors.error }]}>
+                                    MISS
+                                </Animated.Text>
+                            )}
+
+                            {/* Streak Counter */}
+                            <StreakCounter streak={streak} visible={streak > 0} />
 
                             {currentSong?.trackViewUrl && (
                                 <GlassButton

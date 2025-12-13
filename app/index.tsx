@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BackgroundGradient } from '../components/BackgroundGradient';
 import { GlassButton } from '../components/GlassButton';
+import { ModeCard } from '../components/ModeCard';
 import { Colors } from '../constants/Colors';
 import { searchArtists } from '../utils/itunes';
+import { getCookieConsent, setCookieConsent as saveCookieConsent, getPersonalBest } from '../utils/storage';
+import { ArtistResult } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { SettingsModal } from '../components/SettingsModal';
 import Animated, { FadeIn, FadeOut, SlideInRight, SlideInLeft } from 'react-native-reanimated';
@@ -21,11 +24,23 @@ export default function HomeScreen() {
     const [gameCode, setGameCode] = useState('');
     const [artistQuery, setArtistQuery] = useState('');
     const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
-    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [searchResults, setSearchResults] = useState<ArtistResult[]>([]);
     const [searching, setSearching] = useState(false);
     const [settingsVisible, setSettingsVisible] = useState(false);
+    const [personalBest, setPersonalBest] = useState(0);
 
-    const [cookieAccepted, setCookieAccepted] = useState(false);
+    // Load persisted cookie consent
+    const [cookieAccepted, setCookieAccepted] = useState(() => {
+        if (Platform.OS === 'web') {
+            return getCookieConsent();
+        }
+        return true; // Always accepted on native
+    });
+
+    // Load personal best score
+    useEffect(() => {
+        setPersonalBest(getPersonalBest());
+    }, []);
 
     // Debounce search
     useEffect(() => {
@@ -64,21 +79,20 @@ export default function HomeScreen() {
 
     const renderMenu = () => (
         <Animated.View entering={FadeIn} exiting={FadeOut} style={[styles.menuContainer, { flexDirection: isMobile ? 'column' : 'row' }]}>
-            <Pressable style={styles.modeCard} onPress={() => setViewMode('SINGLE')}>
-                <View style={[styles.iconCircle, { backgroundColor: 'rgba(52, 199, 89, 0.2)' }]}>
-                    <Ionicons name="person" size={40} color="#34C759" />
-                </View>
-                <Text style={styles.modeTitle}>Singleplayer</Text>
-                <Text style={styles.modeDesc}>Challenge yourself and beat your high score.</Text>
-            </Pressable>
-
-            <Pressable style={styles.modeCard} onPress={() => setViewMode('MULTI')}>
-                <View style={[styles.iconCircle, { backgroundColor: 'rgba(10, 132, 255, 0.2)' }]}>
-                    <Ionicons name="people" size={40} color="#0A84FF" />
-                </View>
-                <Text style={styles.modeTitle}>Multiplayer</Text>
-                <Text style={styles.modeDesc}>Host a game or join a friend's lobby.</Text>
-            </Pressable>
+            <ModeCard
+                title="Singleplayer"
+                description="Challenge yourself and beat your high score."
+                icon="person"
+                iconColor="#34C759"
+                onPress={() => setViewMode('SINGLE')}
+            />
+            <ModeCard
+                title="Multiplayer"
+                description="Host a game or join a friend's lobby."
+                icon="people"
+                iconColor="#0A84FF"
+                onPress={() => setViewMode('MULTI')}
+            />
         </Animated.View>
     );
 
@@ -153,19 +167,27 @@ export default function HomeScreen() {
         </Animated.View>
     );
 
+    const handleAcceptCookies = () => {
+        setCookieAccepted(true);
+        saveCookieConsent(true);
+    };
+
     const renderCookieBanner = () => (
         !cookieAccepted && (
             <Animated.View entering={FadeIn.delay(1000)} style={styles.cookieBanner}>
                 <Text style={styles.cookieText}>
                     We use cookies to personalize content and ads, to provide social media features and to analyze our traffic.
-                    By using our site, you consent to our privacy policy.
+                    By using our site, you consent to our{' '}
+                    <Link href="/privacy-policy" style={styles.cookieLink}>privacy policy</Link>.
                 </Text>
-                <GlassButton
-                    title="Accept"
-                    onPress={() => setCookieAccepted(true)}
-                    style={{ height: 40, width: 100 }}
-                    textStyle={{ fontSize: 14 }}
-                />
+                <View style={styles.cookieButtons}>
+                    <GlassButton
+                        title="Accept All"
+                        onPress={handleAcceptCookies}
+                        style={{ height: 40, paddingHorizontal: 20 }}
+                        textStyle={{ fontSize: 14 }}
+                    />
+                </View>
             </Animated.View>
         )
     );
@@ -217,10 +239,20 @@ export default function HomeScreen() {
 
     const renderFooter = () => (
         <View style={styles.footer}>
-            <Link href="/privacy-policy" style={styles.link}>Privacy Policy</Link>
-            <Text style={styles.footerDivider}>•</Text>
-            <Link href="/terms" style={styles.link}>Terms of Service</Link>
+            <View style={styles.footerLinks}>
+                <Link href="/privacy-policy" style={styles.link}>Privacy Policy</Link>
+                <Text style={styles.footerDivider}>•</Text>
+                <Link href="/terms" style={styles.link}>Terms of Service</Link>
+                <Text style={styles.footerDivider}>•</Text>
+                <Link href="/contact" style={styles.link}>Contact Us</Link>
+            </View>
             <Text style={styles.copyright}>© 2025 MusiGuess. All rights reserved.</Text>
+            {personalBest > 0 && (
+                <View style={styles.personalBestBadge}>
+                    <Ionicons name="trophy" size={14} color={Colors.lightning} />
+                    <Text style={styles.personalBestText}>Personal Best: {personalBest.toLocaleString()}</Text>
+                </View>
+            )}
         </View>
     );
 
@@ -459,12 +491,26 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         maxWidth: 600
     },
+    cookieLink: {
+        color: Colors.primary,
+        textDecorationLine: 'underline',
+    },
+    cookieButtons: {
+        flexDirection: 'row',
+        gap: 12,
+    },
     footer: {
         width: '100%',
         alignItems: 'center',
         paddingVertical: 20,
         borderTopWidth: 1,
         borderTopColor: 'rgba(255,255,255,0.05)'
+    },
+    footerLinks: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
     },
     link: {
         color: Colors.textSecondary,
@@ -481,6 +527,23 @@ const styles = StyleSheet.create({
         fontSize: 12,
         marginTop: 10,
         opacity: 0.6
-    }
+    },
+    personalBestBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginTop: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        backgroundColor: 'rgba(255, 204, 0, 0.1)',
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 204, 0, 0.3)',
+    },
+    personalBestText: {
+        color: Colors.lightning,
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
 });
 
