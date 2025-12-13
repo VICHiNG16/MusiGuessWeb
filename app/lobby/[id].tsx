@@ -62,6 +62,7 @@ export default function LobbyScreen() {
                 }
             } else if (isHost === 'true') {
                 // Initialize Room if host and empty
+                const hostName = username ? String(username) : 'Host';
                 set(roomRef, {
                     hostUid: currentUid,
                     artist: artist,
@@ -71,7 +72,7 @@ export default function LobbyScreen() {
                     createdAt: Date.now(),
                     players: {
                         [currentUid]: {
-                            name: `Player 1 (Host)`,
+                            name: hostName,
                             score: 0,
                             isHost: true,
                             joinedAt: Date.now()

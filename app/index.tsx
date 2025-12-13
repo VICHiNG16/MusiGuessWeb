@@ -67,9 +67,12 @@ export default function HomeScreen() {
 
     const startGame = () => {
         if (!selectedArtist) return;
+        // Require username for multiplayer
+        if (viewMode === 'MULTI' && !username.trim()) return;
         const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
         const isSolo = viewMode === 'SINGLE';
-        router.push(`/lobby/${roomId}?isHost=true&mode=${isSolo ? 'solo' : 'multi'}&artist=${encodeURIComponent(selectedArtist)}`);
+        const hostName = username.trim() || 'Host';
+        router.push(`/lobby/${roomId}?isHost=true&mode=${isSolo ? 'solo' : 'multi'}&artist=${encodeURIComponent(selectedArtist)}&username=${encodeURIComponent(hostName)}`);
     };
 
     const joinRoom = () => {
@@ -135,7 +138,12 @@ export default function HomeScreen() {
             )}
 
             {selectedArtist && (
-                <GlassButton title="Start Game" onPress={startGame} style={{ marginTop: 20 }} />
+                <GlassButton
+                    title="Start Game"
+                    onPress={startGame}
+                    style={{ marginTop: 20 }}
+                    disabled={viewMode === 'MULTI' && !username.trim()}
+                />
             )}
         </View>
     );
@@ -144,6 +152,17 @@ export default function HomeScreen() {
         <Animated.View entering={SlideInRight} exiting={FadeOut} style={[styles.multiContainer, { flexDirection: isMobile ? 'column' : 'row' }]}>
             <View style={styles.multiColumn}>
                 <Text style={styles.columnTitle}>HOST</Text>
+                <View style={styles.section}>
+                    <Text style={styles.label}>YOUR NAME</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Enter your name"
+                        placeholderTextColor={Colors.textSecondary}
+                        value={username}
+                        onChangeText={setUsername}
+                        maxLength={20}
+                    />
+                </View>
                 {renderArtistSearch()}
             </View>
 
