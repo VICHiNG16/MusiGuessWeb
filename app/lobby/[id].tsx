@@ -204,6 +204,15 @@ export default function LobbyScreen() {
     return (
         <View style={styles.container}>
             <BackgroundGradient />
+
+            {/* Back Button */}
+            <Pressable
+                onPress={() => router.back()}
+                style={styles.backButton}
+            >
+                <Ionicons name="arrow-back" size={24} color={Colors.text} />
+            </Pressable>
+
             <View style={styles.content}>
                 <Text style={styles.title}>LOBBY</Text>
                 {!isSolo && (
@@ -359,5 +368,16 @@ const styles = StyleSheet.create({
     changeArtistText: {
         fontSize: 14,
         color: Colors.primary,
+    },
+    backButton: {
+        position: 'absolute',
+        top: 50,
+        left: 20,
+        zIndex: 50,
+        padding: 10,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
     },
 });
