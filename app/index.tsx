@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator, Image, useWindowDimensions, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator, Image, useWindowDimensions, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -213,26 +213,32 @@ export default function HomeScreen() {
                     onClose={() => setSettingsVisible(false)}
                 />
 
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator={false}
-                    style={{ width: '100%', flex: 1 }}
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{ flex: 1, width: '100%' }}
                 >
-                    {renderHeader()}
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                        style={{ width: '100%', flex: 1 }}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {renderHeader()}
 
-                    <View style={styles.mainContent}>
-                        {viewMode === 'MENU' && renderMenu()}
-                        {viewMode === 'SINGLE' && (
-                            <Animated.View entering={SlideInRight} exiting={FadeOut} style={{ width: '100%', maxWidth: 500 }}>
-                                {renderArtistSearch()}
-                            </Animated.View>
-                        )}
-                        {viewMode === 'MULTI' && renderMultiplayer()}
-                    </View>
+                        <View style={styles.mainContent}>
+                            {viewMode === 'MENU' && renderMenu()}
+                            {viewMode === 'SINGLE' && (
+                                <Animated.View entering={SlideInRight} exiting={FadeOut} style={{ width: '100%', maxWidth: 500 }}>
+                                    {renderArtistSearch()}
+                                </Animated.View>
+                            )}
+                            {viewMode === 'MULTI' && renderMultiplayer()}
+                        </View>
 
-                    {viewMode === 'MENU' && renderAbout()}
-                    {viewMode === 'MENU' && renderFooter()}
-                </ScrollView>
+                        {viewMode === 'MENU' && renderAbout()}
+                        {viewMode === 'MENU' && renderFooter()}
+                    </ScrollView>
+                </KeyboardAvoidingView>
             </SafeAreaView>
         </View>
     );
