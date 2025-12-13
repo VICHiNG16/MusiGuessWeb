@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export interface Song {
     trackId: number;
     trackName: string;
@@ -27,30 +29,62 @@ export async function fetchMusicData(artist: string): Promise<Song[]> {
     }
 }
 
+
+// JSONP Helper for Web
+const jsonp = (url: string): Promise<any> => {
+    return new Promise((resolve, reject) => {
+        const callbackName = 'jsonp_' + Math.round(100000 * Math.random());
+        const script = document.createElement('script');
+
+        (window as any)[callbackName] = (data: any) => {
+            document.body.removeChild(script);
+            delete (window as any)[callbackName];
+            resolve(data);
+        };
+
+        script.src = `${url}&callback=${callbackName}`;
+        script.onerror = (err) => {
+            document.body.removeChild(script);
+            delete (window as any)[callbackName];
+            reject(new Error('JSONP request failed'));
+        };
+
+        document.body.appendChild(script);
+    });
+};
+
 export async function searchArtists(query: string) {
     if (!query || query.length < 2) return [];
     try {
-        // Search albums to get artwork (artist entity doesn't have images)
-        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&attribute=artistTerm&limit=20`);
-        const data = await response.json();
+        let data;
+        const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&attribute=artistTerm&limit=20`;
+
+        if (Platform.OS === 'web') {
+            data = await jsonp(url);
+        } else {
+            const response = await fetch(url);
+            data = await response.json();
+        }
 
         // Deduplicate artists
         const uniqueArtists = new Map();
 
-        data.results.forEach((r: any) => {
-            if (!uniqueArtists.has(r.artistName)) {
-                uniqueArtists.set(r.artistName, {
-                    artistId: r.artistId,
-                    artistName: r.artistName,
-                    primaryGenreName: r.primaryGenreName,
-                    image: r.artworkUrl100 // Use album art as artist image
-                });
-            }
-        });
+        if (data && data.results) {
+            data.results.forEach((r: any) => {
+                if (!uniqueArtists.has(r.artistName)) {
+                    uniqueArtists.set(r.artistName, {
+                        artistId: r.artistId,
+                        artistName: r.artistName,
+                        primaryGenreName: r.primaryGenreName,
+                        image: r.artworkUrl100
+                    });
+                }
+            });
+        }
 
         return Array.from(uniqueArtists.values()).slice(0, 5);
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error searching artists:", error);
-        return [];
+        return [{ artistName: "ERROR: " + (error.message || error.toString()), artistId: 0, image: null }];
     }
 }

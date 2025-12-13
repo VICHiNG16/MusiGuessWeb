@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { BackgroundGradient } from '../../components/BackgroundGradient';
@@ -12,7 +12,7 @@ import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { AdBanner } from '../../components/AdBanner';
 
 export default function LobbyScreen() {
-    const { id, isHost, artist, mode } = useLocalSearchParams();
+    const { id, isHost, artist, mode, artistImage } = useLocalSearchParams();
     const router = useRouter();
     const [status, setStatus] = useState('waiting');
     const [players, setPlayers] = useState<any[]>([]);
@@ -52,6 +52,7 @@ export default function LobbyScreen() {
                 set(roomRef, {
                     hostUid: currentUid,
                     artist: artist,
+                    artistImage: artistImage || '',
                     status: 'waiting',
                     mode: mode || 'multi',
                     createdAt: Date.now(),
@@ -127,12 +128,18 @@ export default function LobbyScreen() {
                 const correct = {
                     trackName: song.trackName,
                     artworkUrl100: song.artworkUrl100,
-                    trackId: song.trackId
+                    trackId: song.trackId,
+                    trackViewUrl: song.trackViewUrl // Include affiliate link
                 };
 
                 const options = [...wrong, correct].sort(() => 0.5 - Math.random());
-                return { ...song, options };
+                return {
+                    ...song, // This already includes trackViewUrl from fetchMusicData map
+                    options
+                };
             });
+
+            console.log("Selected songs:", selected.length, "Updating Firebase...");
 
             await update(ref(db, `rooms/${id}`), {
                 status: 'playing',
@@ -183,9 +190,16 @@ export default function LobbyScreen() {
             <BackgroundGradient />
             <View style={styles.content}>
                 <Text style={styles.title}>LOBBY</Text>
-                <Text style={styles.code}>CODE: {id}</Text>
+                {!isSolo && <Text style={styles.code}>CODE: {id}</Text>}
 
-                <Text style={styles.artistLabel}>Artist: <Text style={{ color: Colors.primary }}>{roomData.artist}</Text></Text>
+                {(roomData.artistImage || artistImage) && (
+                    <Image
+                        source={{ uri: (roomData.artistImage || artistImage) as string }}
+                        style={styles.artistArtwork}
+                    />
+                )}
+
+                <Text style={styles.artistLabel}><Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 24 }}>{roomData.artist}</Text></Text>
 
                 <View style={styles.playerListContainer}>
                     <Text style={styles.sectionHeader}>Players ({players.length}/6)</Text>
@@ -250,5 +264,13 @@ const styles = StyleSheet.create({
     },
     playerName: { color: Colors.text, fontSize: 16, fontWeight: '600' },
     waitingMsg: { color: Colors.textSecondary, marginTop: 40, fontSize: 16, fontStyle: 'italic' },
-    error: { color: Colors.error, marginTop: 20 }
+    error: { color: Colors.error, marginTop: 20 },
+    artistArtwork: {
+        width: 200,
+        height: 200,
+        borderRadius: 12,
+        marginBottom: 20,
+        borderWidth: 2,
+        borderColor: 'rgba(255,255,255,0.1)'
+    }
 });

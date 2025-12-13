@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 import { signInAnonymously } from 'firebase/auth';
 import { auth } from '../utils/firebaseConfig';
 
+import { Ionicons } from '@expo/vector-icons';
+import { SettingsProvider } from '../context/SettingsContext';
 
 export default function Layout() {
     const [fontsLoaded] = useFonts({
@@ -15,6 +17,7 @@ export default function Layout() {
         Outfit_900Black,
         Inter_400Regular,
         Inter_600SemiBold,
+        ...Ionicons.font,
     });
 
     // State for font loading fallback
@@ -82,16 +85,13 @@ export default function Layout() {
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: Colors.background }}>
+        <SettingsProvider>
             <StatusBar style="light" />
-            <Stack screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: Colors.background }
-            }}>
+            <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
+                {/* <Stack.Screen name="game/[id]" /> */}
                 <Stack.Screen name="lobby/[id]" />
-                <Stack.Screen name="game/[id]" />
             </Stack>
-        </View>
+        </SettingsProvider>
     );
 }

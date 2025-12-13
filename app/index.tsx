@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator, Image, useWindowDimensions } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator, Image, useWindowDimensions, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { useRouter, Link } from 'expo-router';
 import { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BackgroundGradient } from '../components/BackgroundGradient';
@@ -24,6 +24,8 @@ export default function HomeScreen() {
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [searching, setSearching] = useState(false);
     const [settingsVisible, setSettingsVisible] = useState(false);
+
+    const [cookieAccepted, setCookieAccepted] = useState(false);
 
     // Debounce search
     useEffect(() => {
@@ -59,19 +61,6 @@ export default function HomeScreen() {
             router.push(`/lobby/${gameCode}?isHost=false`);
         }
     };
-
-    const renderHeader = () => (
-        <View style={styles.header}>
-            <Text style={styles.title}>MUSI</Text>
-            <Text style={styles.subtitle}>GUESS</Text>
-            {viewMode !== 'MENU' && (
-                <Pressable onPress={() => setViewMode('MENU')} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={Colors.textSecondary} />
-                    <Text style={styles.backText}>Back to Menu</Text>
-                </Pressable>
-            )}
-        </View>
-    );
 
     const renderMenu = () => (
         <Animated.View entering={FadeIn} exiting={FadeOut} style={[styles.menuContainer, { flexDirection: isMobile ? 'column' : 'row' }]}>
@@ -164,6 +153,92 @@ export default function HomeScreen() {
         </Animated.View>
     );
 
+    const renderCookieBanner = () => (
+        !cookieAccepted && (
+            <Animated.View entering={FadeIn.delay(1000)} style={styles.cookieBanner}>
+                <Text style={styles.cookieText}>
+                    We use cookies to personalize content and ads, to provide social media features and to analyze our traffic.
+                    By using our site, you consent to our privacy policy.
+                </Text>
+                <GlassButton
+                    title="Accept"
+                    onPress={() => setCookieAccepted(true)}
+                    style={{ height: 40, width: 100 }}
+                    textStyle={{ fontSize: 14 }}
+                />
+            </Animated.View>
+        )
+    );
+
+    const renderFAQ = () => (
+        <View style={styles.faqContainer}>
+            <Text style={styles.aboutSubtitle}>Frequently Asked Questions</Text>
+
+            <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Is MusiGuess free to play?</Text>
+                <Text style={styles.faqAnswer}>Yes! MusiGuess is 100% free. You can play unlimited rounds locally or with friends.</Text>
+            </View>
+
+            <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Do I need an Apple Music subscription?</Text>
+                <Text style={styles.faqAnswer}>No. We use 30-second previews provided by iTunes which are free for everyone. If you want to listen to the full song, we provide a link to Apple Music.</Text>
+            </View>
+
+            <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Can I play with friends?</Text>
+                <Text style={styles.faqAnswer}>Absolutely. Choose "Multiplayer", share the 6-digit room code with your friends, and see who knows their music best!</Text>
+            </View>
+        </View>
+    );
+
+    const renderAbout = () => (
+        <View style={styles.aboutContainer}>
+            <Text style={styles.aboutTitle}>About MusiGuess</Text>
+            <Text style={styles.aboutText}>
+                MusiGuess is the ultimate real-time music trivia game where you can challenge your friends or play solo to test your knowledge of your favorite artists.
+            </Text>
+
+            <Text style={styles.aboutSubtitle}>How to Play</Text>
+            <Text style={styles.aboutText}>
+                1. <Text style={{ fontWeight: 'bold' }}>Select an Artist:</Text> Choose from millions of artists available on iTunes.
+            </Text>
+            <Text style={styles.aboutText}>
+                2. <Text style={{ fontWeight: 'bold' }}>Listen & Guess:</Text> You'll hear a 30-second preview of a random song. Guess the song title as fast as you can!
+            </Text>
+            <Text style={styles.aboutText}>
+                3. <Text style={{ fontWeight: 'bold' }}>Score Points:</Text> The faster you guess, the more points you earn. Compete against friends in multiplayer mode to see who the real superfan is.
+            </Text>
+
+            <Text style={styles.disclaimer}>
+                Music previews are provided courtesy of Apple iTunes. All rights belong to the respective owners. This game is for entertainment purposes only.
+            </Text>
+        </View>
+    );
+
+    const renderFooter = () => (
+        <View style={styles.footer}>
+            <Link href="/privacy-policy" style={styles.link}>Privacy Policy</Link>
+            <Text style={styles.footerDivider}>•</Text>
+            <Link href="/terms" style={styles.link}>Terms of Service</Link>
+            <Text style={styles.copyright}>© 2025 MusiGuess. All rights reserved.</Text>
+        </View>
+    );
+
+    const renderHeader = () => (
+        <View style={styles.header}>
+            <Text style={styles.title}>MUSI</Text>
+            <Text style={styles.subtitle}>GUESS</Text>
+            {viewMode !== 'MENU' && (
+                <Pressable onPress={() => setViewMode('MENU')} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={Colors.textSecondary} />
+                    <Text style={styles.backText}>Back to Menu</Text>
+                </Pressable>
+            )}
+        </View>
+    );
+
+    // ... (Keep existing Renders) ...
+
     return (
         <View style={styles.container}>
             <BackgroundGradient />
@@ -180,18 +255,39 @@ export default function HomeScreen() {
                     onClose={() => setSettingsVisible(false)}
                 />
 
-                {renderHeader()}
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    style={{ flex: 1, width: '100%' }}
+                >
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContent}
+                        showsVerticalScrollIndicator={false}
+                        style={{ width: '100%', flex: 1 }}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        {renderHeader()}
 
-                <View style={styles.mainContent}>
-                    {viewMode === 'MENU' && renderMenu()}
-                    {viewMode === 'SINGLE' && (
-                        <Animated.View entering={SlideInRight} exiting={FadeOut} style={{ width: '100%', maxWidth: 500 }}>
-                            {renderArtistSearch()}
-                        </Animated.View>
-                    )}
-                    {viewMode === 'MULTI' && renderMultiplayer()}
-                </View>
+                        <View style={styles.mainContent}>
+                            {viewMode === 'MENU' && renderMenu()}
+                            {viewMode === 'SINGLE' && (
+                                <Animated.View entering={SlideInRight} exiting={FadeOut} style={{ width: '100%', maxWidth: 500 }}>
+                                    {renderArtistSearch()}
+                                </Animated.View>
+                            )}
+                            {viewMode === 'MULTI' && renderMultiplayer()}
+                        </View>
 
+                        {viewMode === 'MENU' && (
+                            <>
+                                {renderAbout()}
+                                {renderFAQ()}
+                            </>
+                        )}
+                        {viewMode === 'MENU' && renderFooter()}
+                    </ScrollView>
+                </KeyboardAvoidingView>
+
+                {renderCookieBanner()}
             </SafeAreaView>
         </View>
     );
@@ -199,7 +295,13 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
-    content: { flex: 1, padding: 24, alignItems: 'center' },
+    content: { flex: 1 }, // Changed from padding: 24 to full width
+    scrollContent: {
+        alignItems: 'center',
+        paddingVertical: 40,
+        paddingHorizontal: 24,
+        minHeight: '100%'
+    },
     header: { alignItems: 'center', marginBottom: 40, marginTop: 20 },
     title: {
         fontSize: 64,
@@ -221,7 +323,7 @@ const styles = StyleSheet.create({
     backButton: { flexDirection: 'row', alignItems: 'center', marginTop: 20, gap: 8 },
     backText: { color: Colors.textSecondary, fontSize: 16 },
 
-    mainContent: { flex: 1, width: '100%', justifyContent: 'center', alignItems: 'center' },
+    mainContent: { width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 60 }, // Removed flex:1
 
     // Menu
     menuContainer: { gap: 30, alignItems: 'center' },
@@ -235,7 +337,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 24,
-        cursor: 'pointer' // Web only property, but react-native-web handles it mostly or ignores
+        cursor: 'pointer'
     },
     iconCircle: {
         width: 80, height: 80, borderRadius: 40,
@@ -284,6 +386,101 @@ const styles = StyleSheet.create({
     },
     artistImage: { width: 40, height: 40, borderRadius: 20, backgroundColor: Colors.surfaceHighlight },
     dropdownTitle: { color: Colors.text, fontSize: 16, fontWeight: 'bold' },
-    dropdownSubtitle: { color: Colors.textSecondary, fontSize: 12 }
+    dropdownSubtitle: { color: Colors.textSecondary, fontSize: 12 },
+
+    // About & Footer & Cookie
+    aboutContainer: {
+        width: '100%',
+        maxWidth: 800,
+        padding: 30,
+        backgroundColor: 'rgba(30, 30, 40, 0.4)',
+        borderRadius: 24,
+        marginBottom: 40
+    },
+    faqContainer: {
+        width: '100%',
+        maxWidth: 800,
+        padding: 30,
+        marginBottom: 40,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.05)'
+    },
+    faqItem: { marginBottom: 20 },
+    faqQuestion: { color: Colors.text, fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
+    faqAnswer: { color: Colors.textSecondary, fontSize: 16, lineHeight: 24 },
+
+    aboutTitle: {
+        fontSize: 28,
+        fontFamily: 'Outfit_700Bold',
+        color: Colors.text,
+        marginBottom: 16,
+        textAlign: 'center'
+    },
+    aboutSubtitle: {
+        fontSize: 20,
+        fontFamily: 'Outfit_700Bold',
+        color: Colors.text,
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    aboutText: {
+        color: Colors.textSecondary,
+        fontSize: 16,
+        lineHeight: 24,
+        marginBottom: 10,
+        fontFamily: 'Inter_400Regular'
+    },
+    disclaimer: {
+        color: Colors.textSecondary,
+        fontSize: 12,
+        fontStyle: 'italic',
+        marginTop: 20,
+        textAlign: 'center',
+        opacity: 0.7
+    },
+    cookieBanner: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#1E1E24',
+        padding: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.1)',
+        zIndex: 100,
+        gap: 16
+    },
+    cookieText: {
+        color: Colors.textSecondary,
+        fontSize: 12,
+        textAlign: 'center',
+        marginBottom: 8,
+        maxWidth: 600
+    },
+    footer: {
+        width: '100%',
+        alignItems: 'center',
+        paddingVertical: 20,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.05)'
+    },
+    link: {
+        color: Colors.textSecondary,
+        fontSize: 14,
+        textDecorationLine: 'underline',
+        marginHorizontal: 10
+    },
+    footerDivider: {
+        color: Colors.textSecondary,
+        marginHorizontal: 8
+    },
+    copyright: {
+        color: Colors.textSecondary,
+        fontSize: 12,
+        marginTop: 10,
+        opacity: 0.6
+    }
 });
 

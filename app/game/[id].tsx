@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, ActivityIndicator, FlatList, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator, FlatList, useWindowDimensions, Linking, Vibration, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import { Audio } from 'expo-av';
@@ -12,6 +12,7 @@ import { ScoreTicker } from '../../components/ScoreTicker';
 import { SongCard } from '../../components/SongCard';
 import { Ionicons } from '@expo/vector-icons';
 import { AdBanner } from '../../components/AdBanner';
+import { useSettings } from '../../context/SettingsContext';
 
 export default function GameScreen() {
     const { id, mode } = useLocalSearchParams();
@@ -29,6 +30,7 @@ export default function GameScreen() {
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [hasGuessed, setHasGuessed] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [volume, setVolume] = useState(1.0); // 0.0 to 1.0
 
     // Derived State
     const isReveal = gameData?.gameState === 'reveal';
@@ -39,7 +41,9 @@ export default function GameScreen() {
     // Initial Data Load
     useEffect(() => {
         const roomRef = ref(db, `rooms/${id}`);
+        // ... (rest of initial load, omitting to focus on changes) ...
         const unsub = onValue(roomRef, (snapshot) => {
+            // ... existing logic ...
             const data = snapshot.val();
             if (data) {
                 setGameData(data);
@@ -60,55 +64,124 @@ export default function GameScreen() {
     }, [id]);
 
 
-    // Music & Timer
+    // Sudden Death Listener
     useEffect(() => {
-        let timer: NodeJS.Timeout;
+        if (gameData?.gameState === 'preview' && gameData?.roundState?.suddenDeath) {
+            setTimeRemaining(prev => Math.min(prev, 10));
+        }
+    }, [gameData?.roundState?.suddenDeath, gameData?.gameState]);    // Music & Timer
+    const { soundEnabled, hapticsEnabled } = useSettings();
 
-        const loadMusic = async () => {
-            if (!currentSong?.previewUrl) return;
-            try {
-                if (sound) await sound.unloadAsync();
-                const { sound: newSound } = await Audio.Sound.createAsync(
-                    { uri: currentSong.previewUrl },
-                    { shouldPlay: false }
-                );
-                setSound(newSound);
-                setIsPlaying(false);
-                if (!isReveal) {
-                    await newSound.playAsync();
-                    setIsPlaying(true);
+    // 1. Audio Configuration
+    useEffect(() => {
+        Audio.setAudioModeAsync({
+            playsInSilentModeIOS: true,
+            staysActiveInBackground: false,
+            shouldDuckAndroid: true,
+        }).catch(err => console.log("Audio Config Error", err));
+    }, []);
+
+    // Volume Effect
+    useEffect(() => {
+        if (sound) {
+            sound.setVolumeAsync(volume);
+        }
+    }, [volume, sound]);
+
+    // 2. Music Player Effect (Consolidated)
+    useEffect(() => {
+        let currentSound: Audio.Sound | null = null;
+        let isMounted = true;
+
+        const managePlayback = async () => {
+            // If in preview, we want music (IF enabled).
+            if (gameData?.gameState === 'preview' && currentSong?.previewUrl && soundEnabled) {
+                // Unload previous if exists in state (safety check, though we likely reconstruct)
+                if (sound) {
+                    try { await sound.unloadAsync(); } catch (e) { }
                 }
-            } catch (err) {
-                // Ignore
+
+                try {
+                    // Create NEW sound, but DO NOT auto-play in creation (better control)
+                    const { sound: newSound } = await Audio.Sound.createAsync(
+                        { uri: currentSong.previewUrl },
+                        { shouldPlay: false, isLooping: true, volume: volume }
+                    );
+
+                    if (isMounted) {
+                        setSound(newSound);
+                        currentSound = newSound;
+
+                        // Attempt Autoplay
+                        try {
+                            await newSound.playAsync();
+                            setIsPlaying(true);
+                        } catch (playError) {
+                            console.log("Autoplay blocked (expected on mobile):", playError);
+                            // Do NOT set isPlaying true, so "PLAY MUSIC" button is valid
+                            setIsPlaying(false);
+                        }
+                    } else {
+                        newSound.unloadAsync();
+                    }
+                } catch (error) {
+                    console.log("Error loading/playing sound:", error);
+                }
+            } else {
+                // Review/Game Over -> Stop
+                if (sound) {
+                    try {
+                        await sound.stopAsync();
+                    } catch (e) { }
+                }
+                setIsPlaying(false);
             }
         };
 
-        if (gameData?.gameState === 'preview') {
-            setHasGuessed(false);
-            setTimeRemaining(30);
-            loadMusic();
+        managePlayback();
 
+        return () => {
+            isMounted = false;
+            if (currentSound) {
+                currentSound.unloadAsync();
+            }
+        };
+    }, [currentSong?.previewUrl, gameData?.gameState, soundEnabled]); // Depend on Song, State, and Settings
+
+    // 3. Timer Effect
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+
+        if (gameData?.gameState === 'preview') {
             timer = setInterval(() => {
                 setTimeRemaining((prev) => {
                     if (prev <= 1) {
                         clearInterval(timer);
-                        handleGuessTimeout();
+                        // We rely on the separate Auto-Timeout effect or ensure logic is separate
                         return 0;
                     }
                     return prev - 1;
                 });
             }, 1000);
-
-        } else if (isReveal) {
-            if (sound) sound.stopAsync();
-            setIsPlaying(false);
         }
 
-        return () => {
-            clearInterval(timer);
-            if (sound) sound.unloadAsync();
-        };
-    }, [gameData?.currentRound, gameData?.gameState, currentSong]);
+        return () => clearInterval(timer);
+    }, [gameData?.gameState]);
+
+    // Auto-timeout trigger
+    useEffect(() => {
+        if (timeRemaining === 0 && gameData?.gameState === 'preview' && !hasGuessed) {
+            handleGuess("TIMEOUT");
+        }
+    }, [timeRemaining, gameData?.gameState, hasGuessed]);
+
+    // Initial Round Setup Effect
+    useEffect(() => {
+        if (gameData?.gameState === 'preview') {
+            setHasGuessed(false);
+            setTimeRemaining(30);
+        }
+    }, [gameData?.currentRound]);
 
 
     const toggleMusic = async () => {
@@ -123,14 +196,22 @@ export default function GameScreen() {
     };
 
 
+
     const handleGuess = async (selectedTitle: string) => {
         if (hasGuessed || isReveal || !currentUid) return;
+
+        if (hapticsEnabled) {
+            Vibration.vibrate(10); // Short tick
+        }
 
         setHasGuessed(true);
         const isCorrect = selectedTitle === currentSong.trackName;
 
-        // Calc score
-        const points = isCorrect ? 1000 + (timeRemaining * 10) : 0;
+        // Calc score (Exponential Decay: Fast drop start, slow tail)
+        // Max 100, Min ~10 after 30s
+        const elapsed = 30 - timeRemaining;
+        const decayFactor = 0.08;
+        const points = isCorrect ? Math.round(100 * Math.exp(-decayFactor * elapsed)) : 0;
 
         // Push Guess
         await update(ref(db, `rooms/${id}/roundState/guesses/${currentUid}`), {
@@ -145,29 +226,43 @@ export default function GameScreen() {
     };
 
 
-    // Host Logic: Check if all players guessed
+    // Host Logic: Check if all players guessed + Sudden Death
     useEffect(() => {
         if (isHost && gameData?.roundState?.guesses && !isReveal) {
             const guesses = Object.keys(gameData.roundState.guesses);
+            const remainingPlayers = players.length - guesses.length;
+
+            // Sudden Death: If 2 or fewer players left, force timer to 10s
+            // Only trigger if we haven't already and there ARE players left
+            if (remainingPlayers <= 2 && remainingPlayers > 0 && !gameData.roundState.suddenDeath && gameData.gameState === 'preview') {
+                update(ref(db, `rooms/${id}/roundState`), { suddenDeath: true });
+            }
+
             const allPlayersGuessed = players.length > 0 && guesses.length === players.length;
 
             if (allPlayersGuessed && revealProcessed.current !== gameData.currentRound) {
                 revealProcessed.current = gameData.currentRound;
 
-                // Update Scores
+                // Update Scores & Misses
                 const updates: any = { gameState: 'reveal' };
                 players.forEach(p => {
                     const guessData = gameData.roundState.guesses[p.uid];
                     if (guessData) {
                         const newScore = (p.score || 0) + (guessData.scoreDelta || 0);
+                        const newMisses = (p.misses || 0) + (guessData.isCorrect ? 0 : 1);
                         updates[`players/${p.uid}/score`] = newScore;
+                        updates[`players/${p.uid}/misses`] = newMisses;
+                    } else {
+                        // If they didn't guess (timeout), it's a miss
+                        const newMisses = (p.misses || 0) + 1;
+                        updates[`players/${p.uid}/misses`] = newMisses;
                     }
                 });
 
                 update(ref(db, `rooms/${id}`), updates);
             }
         }
-    }, [gameData?.roundState?.guesses, players, isHost, isReveal]);
+    }, [gameData?.roundState?.guesses, players, isHost, isReveal, gameData?.roundState?.suddenDeath]);
 
 
     // Host Logic: Next Round Vote Handling
@@ -236,6 +331,14 @@ export default function GameScreen() {
                         ))}
                     </View>
 
+                    {currentSong?.trackViewUrl && (
+                        <GlassButton
+                            title="Listen on Apple Music 🎵"
+                            onPress={() => Linking.openURL(currentSong.trackViewUrl)}
+                            style={{ marginTop: 20, backgroundColor: 'rgba(250, 35, 59, 0.2)', borderColor: '#fa233b' }}
+                        />
+                    )}
+
                     <GlassButton title="Return to Lobby" onPress={() => router.replace('/')} style={{ marginTop: 40 }} />
                     <AdBanner style={{ marginTop: 30 }} />
                 </View>
@@ -261,7 +364,10 @@ export default function GameScreen() {
                     {gameData.gameState === 'preview' && hasGuessedRound && (
                         <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
                     )}
-                    <Text style={styles.lbScore}>{item.score}</Text>
+                    <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={styles.lbScore}>{item.score}</Text>
+                        <Text style={{ fontSize: 10, color: Colors.error, fontWeight: 'bold' }}>{item.misses || 0} X</Text>
+                    </View>
                 </View>
             </Animated.View>
         );
@@ -271,7 +377,7 @@ export default function GameScreen() {
         <View style={styles.container}>
             <BackgroundGradient />
 
-            <View style={styles.gameLayout}>
+            <View style={{ flex: 1, flexDirection: isMobile ? 'column' : 'row' }}>
                 {/* Left: Leaderboard (Desktop) or Top (Mobile) */}
                 <View style={isMobile ? styles.mobileHeader : styles.sidebar}>
                     <Text style={styles.sidebarTitle}>LEADERBOARD</Text>
@@ -286,6 +392,23 @@ export default function GameScreen() {
                         <View style={{ marginTop: 20, alignItems: 'center' }}>
                             <Text style={styles.timer}>{timeRemaining}</Text>
                             <Text style={{ color: Colors.textSecondary }}>SECONDS</Text>
+
+                            {/* Volume Slider for Desktop */}
+                            {Platform.OS === 'web' && (
+                                <View style={{ marginTop: 30, width: '100%', paddingHorizontal: 10 }}>
+                                    <Text style={{ color: Colors.textSecondary, marginBottom: 5, fontSize: 12, fontWeight: 'bold' }}>VOLUME</Text>
+                                    {/* @ts-ignore */}
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.05"
+                                        value={volume}
+                                        onChange={(e: any) => setVolume(parseFloat(e.target.value))}
+                                        style={{ width: '100%', accentColor: Colors.primary, cursor: 'pointer' }}
+                                    />
+                                </View>
+                            )}
                         </View>
                     )}
                 </View>
@@ -311,6 +434,14 @@ export default function GameScreen() {
                             <Animated.Text entering={ZoomIn.delay(300)} style={[styles.deltaScore, { color: (gameData.roundState?.guesses?.[currentUid || '']?.scoreDelta > 0) ? Colors.success : Colors.error }]}>
                                 {(gameData.roundState?.guesses?.[currentUid || '']?.scoreDelta > 0) ? `+${gameData.roundState?.guesses?.[currentUid || '']?.scoreDelta}` : "MISS"}
                             </Animated.Text>
+
+                            {currentSong?.trackViewUrl && (
+                                <GlassButton
+                                    title="Listen on Apple Music 🎵"
+                                    onPress={() => Linking.openURL(currentSong.trackViewUrl)}
+                                    style={{ marginTop: 20, backgroundColor: 'rgba(250, 35, 59, 0.2)', borderColor: '#fa233b', width: 250 }}
+                                />
+                            )}
 
                             {isHost ? (
                                 <GlassButton title="Next Song" onPress={handleNextRoundVote} style={{ marginTop: 40 }} />
