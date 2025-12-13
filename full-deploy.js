@@ -21,7 +21,23 @@ const newExpoDir = path.join(distPath, 'expo');
 // 2. Rename _expo -> expo
 console.log("📂 Renaming _expo folder...");
 if (fs.existsSync(expoDir)) {
-    fs.renameSync(expoDir, newExpoDir);
+    if (fs.existsSync(newExpoDir)) {
+        fs.rmSync(newExpoDir, { recursive: true, force: true });
+    }
+    // Retry loop for Windows EPERM
+    let retries = 5;
+    while (retries > 0) {
+        try {
+            fs.renameSync(expoDir, newExpoDir);
+            break;
+        } catch (e) {
+            console.log(`⚠️  Rename failed (EPERM), retrying in 1s... (${retries})`);
+            retries--;
+            const start = Date.now();
+            while (Date.now() - start < 1000) { } // Busy wait 1s
+            if (retries === 0) throw e;
+        }
+    }
 }
 
 // 2b. Rename node_modules -> modules (GitHub ignores node_modules)
