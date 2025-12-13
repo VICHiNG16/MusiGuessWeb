@@ -50,7 +50,7 @@ export function SettingsModal({ onClose }: Props) {
 
                 <View style={styles.divider} />
 
-                <Pressable onPress={() => Linking.openURL('https://github.com/VICHiNG16/MusiGuess')}>
+                <Pressable onPress={() => Linking.openURL('https://github.com/VICHiNG16/MusiGuessWeb')}>
                     <Text style={styles.link}>View on GitHub</Text>
                 </Pressable>
 
