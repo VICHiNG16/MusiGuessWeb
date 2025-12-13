@@ -182,7 +182,7 @@ export default function LobbyScreen() {
         <Animated.View
             entering={FadeInDown.delay(index * 100)}
             layout={Layout.springify()}
-            style={styles.playerCard}
+            style={[styles.playerCard, players.length > 3 && { flex: 1 }]}
         >
             <View style={styles.avatar}>
                 <Ionicons name="person" size={24} color={Colors.text} />
@@ -248,9 +248,12 @@ export default function LobbyScreen() {
                 <View style={[styles.playerListContainer, isMobile && { minWidth: '100%', padding: 10 }]}>
                     <Text style={styles.sectionHeader}>Players ({players.length}/6)</Text>
                     <FlatList
+                        key={players.length > 3 ? 'grid' : 'list'}
                         data={players.sort((a, b) => a.joinedAt - b.joinedAt)}
                         renderItem={renderPlayer}
                         keyExtractor={item => item.uid}
+                        numColumns={players.length > 3 ? 2 : 1}
+                        columnWrapperStyle={players.length > 3 ? { gap: 10 } : undefined}
                         contentContainerStyle={{ gap: 8 }}
                         style={{ width: '100%' }}
                         scrollEnabled={false}
@@ -291,7 +294,7 @@ export default function LobbyScreen() {
                     </Pressable>
                 )}
             </ScrollView>
-        </View>
+        </View >
     );
 }
 
