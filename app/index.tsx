@@ -292,14 +292,30 @@ export default function HomeScreen() {
 
     const renderHeader = () => (
         <View style={styles.header}>
-            <Text style={styles.title}>MUSI</Text>
-            <Text style={styles.subtitle}>GUESS</Text>
+            {/* Back Button - Always top left when not on menu */}
             {viewMode !== 'MENU' && (
-                <Pressable onPress={() => setViewMode('MENU')} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={Colors.textSecondary} />
-                    <Text style={styles.backText}>Back to Menu</Text>
+                <Pressable
+                    onPress={() => setViewMode('MENU')}
+                    style={styles.topLeftBackButton}
+                    accessibilityLabel="Go back to menu"
+                    accessibilityRole="button"
+                >
+                    <Ionicons name="arrow-back" size={22} color={Colors.text} />
                 </Pressable>
             )}
+
+            {/* Logo and Title */}
+            <View style={styles.logoContainer}>
+                <Image
+                    source={require('../assets/images/logo.png')}
+                    style={styles.logoImage}
+                    resizeMode="contain"
+                />
+                <View style={styles.titleContainer}>
+                    <Text style={styles.title}>MUSI</Text>
+                    <Text style={styles.subtitle}>GUESS</Text>
+                </View>
+            </View>
         </View>
     );
 
@@ -385,6 +401,27 @@ const styles = StyleSheet.create({
         color: Colors.text,
         letterSpacing: 12,
         opacity: 0.8,
+    },
+    logoContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    logoImage: {
+        width: 60,
+        height: 60,
+    },
+    titleContainer: {
+        alignItems: 'flex-start',
+    },
+    topLeftBackButton: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        padding: 10,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 12,
+        zIndex: 10,
     },
     backButton: { flexDirection: 'row', alignItems: 'center', marginTop: 20, gap: 8 },
     backText: { color: Colors.textSecondary, fontSize: 16 },

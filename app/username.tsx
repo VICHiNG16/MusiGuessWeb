@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, useWindowDimensions, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, useWindowDimensions, KeyboardAvoidingView, Platform, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { BackgroundGradient } from '../components/BackgroundGradient';
 import { GlassButton } from '../components/GlassButton';
@@ -28,6 +28,16 @@ export default function UsernameScreen() {
     return (
         <View style={styles.container}>
             <BackgroundGradient />
+
+            {/* Top Left Back Button */}
+            <Pressable
+                onPress={handleBack}
+                style={styles.topLeftBackButton}
+                accessibilityLabel="Go back"
+                accessibilityRole="button"
+            >
+                <Ionicons name="arrow-back" size={22} color={Colors.text} />
+            </Pressable>
 
             <KeyboardAvoidingView
                 style={styles.keyboardView}
@@ -83,13 +93,6 @@ export default function UsernameScreen() {
                                 onPress={handleContinue}
                                 disabled={!username.trim()}
                                 style={{ width: '100%' }}
-                            />
-
-                            <GlassButton
-                                title="Back"
-                                onPress={handleBack}
-                                variant="secondary"
-                                style={{ width: '100%', marginTop: 12 }}
                             />
                         </Animated.View>
                     </Animated.View>
@@ -167,5 +170,14 @@ const styles = StyleSheet.create({
     buttonContainer: {
         width: '100%',
         alignItems: 'center',
+    },
+    topLeftBackButton: {
+        position: 'absolute',
+        top: 50,
+        left: 20,
+        padding: 10,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 12,
+        zIndex: 10,
     },
 });
