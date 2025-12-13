@@ -139,6 +139,8 @@ export default function LobbyScreen() {
                 };
             });
 
+            console.log("Selected songs:", selected.length, "Updating Firebase...");
+
             await update(ref(db, `rooms/${id}`), {
                 status: 'playing',
                 songs: selected,

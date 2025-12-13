@@ -44,6 +44,15 @@ async function fetchItunes(url: string): Promise<any> {
             };
 
             document.body.appendChild(script);
+
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                if ((window as any)[callbackName]) {
+                    delete (window as any)[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('JSONP Request Timeout'));
+                }
+            }, 10000);
         });
     } else {
         const response = await fetch(url);
