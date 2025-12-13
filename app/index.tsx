@@ -62,7 +62,7 @@ export default function HomeScreen() {
 
     const renderHeader = () => (
         <View style={styles.header}>
-            <Text style={styles.title}>MUSIGUESS</Text>
+            <Text style={[styles.title, isMobile && { fontSize: 42, letterSpacing: 4 }]}>MUSIGUESS</Text>
             <Text style={styles.subtitle}>LIVE</Text>
             {viewMode !== 'MENU' && (
                 <Pressable onPress={() => setViewMode('MENU')} style={styles.backButton}>
