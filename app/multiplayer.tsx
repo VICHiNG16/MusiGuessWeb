@@ -28,6 +28,11 @@ export default function MultiplayerScreen() {
     // Updated state to track image
     const [selectedArtistImage, setSelectedArtistImage] = useState<string | null>(null);
 
+    // Restored state
+    const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [searching, setSearching] = useState(false);
+
     // Join room state
     const [gameCode, setGameCode] = useState('');
 
