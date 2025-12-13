@@ -561,14 +561,14 @@ export default function GameScreen() {
                                             tier={lastScoreResult.speedTier}
                                             points={lastScoreResult.totalPoints}
                                             visible={lastScoreResult.totalPoints > 0}
-                                            style={{ height: 60 }}
+                                            style={{ minWidth: 140 }}
                                         />
                                     )}
 
                                     <StreakCounter
                                         streak={streak}
                                         visible={streak > 0}
-                                        style={{ height: 60, marginTop: 0 }}
+                                        style={{ minWidth: 100, marginTop: 0 }}
                                     />
                                 </View>
 
