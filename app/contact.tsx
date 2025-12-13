@@ -112,21 +112,6 @@ export default function Contact() {
                             <Ionicons name="mail-outline" size={24} color={Colors.primary} />
                             <Text style={styles.contactText}>calu.andrei.dev@gmail.com</Text>
                         </Pressable>
-
-                        <View style={styles.socialLinks}>
-                            <Text style={styles.socialTitle}>Follow Us</Text>
-                            <View style={styles.socialIcons}>
-                                <Pressable style={styles.socialIcon}>
-                                    <Ionicons name="logo-twitter" size={24} color={Colors.textSecondary} />
-                                </Pressable>
-                                <Pressable style={styles.socialIcon}>
-                                    <Ionicons name="logo-instagram" size={24} color={Colors.textSecondary} />
-                                </Pressable>
-                                <Pressable style={styles.socialIcon}>
-                                    <Ionicons name="logo-discord" size={24} color={Colors.textSecondary} />
-                                </Pressable>
-                            </View>
-                        </View>
                     </View>
 
                     <View style={styles.faqTeaser}>
