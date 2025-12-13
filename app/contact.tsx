@@ -17,7 +17,7 @@ export default function Contact() {
         // For now, open email client with pre-filled message
         const subject = encodeURIComponent(`MusiGuess Contact: ${name}`);
         const body = encodeURIComponent(`From: ${name}\nEmail: ${email}\n\n${message}`);
-        const mailtoLink = `mailto:contact@musiguess.live?subject=${subject}&body=${body}`;
+        const mailtoLink = `mailto:calu.andrei.dev@gmail.com?subject=${subject}&body=${body}`;
 
         if (Platform.OS === 'web') {
             window.open(mailtoLink, '_blank');
@@ -107,10 +107,10 @@ export default function Contact() {
 
                         <Pressable
                             style={styles.contactMethod}
-                            onPress={() => Linking.openURL('mailto:contact@musiguess.live')}
+                            onPress={() => Linking.openURL('mailto:calu.andrei.dev@gmail.com')}
                         >
                             <Ionicons name="mail-outline" size={24} color={Colors.primary} />
-                            <Text style={styles.contactText}>contact@musiguess.live</Text>
+                            <Text style={styles.contactText}>calu.andrei.dev@gmail.com</Text>
                         </Pressable>
 
                         <View style={styles.socialLinks}>
