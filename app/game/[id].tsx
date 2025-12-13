@@ -555,69 +555,69 @@ export default function GameScreen() {
                                 <Text style={styles.artistName}>{currentSong.artistName}</Text>
 
                                 {/* New Speed Badge & Streak Row */}
-                                <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch', marginTop: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
-                                    {lastScoreResult && (
-                                        <SpeedBadge
-                                            tier={lastScoreResult.speedTier}
-                                            points={lastScoreResult.totalPoints}
-                                            visible={lastScoreResult.totalPoints > 0}
-                                            style={{ minWidth: 140, flex: 1 }}
+                                <View style={{ width: '100%', maxWidth: 350 }}>
+                                    <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch', marginTop: 10 }}>
+                                        {lastScoreResult && (
+                                            <SpeedBadge
+                                                tier={lastScoreResult.speedTier}
+                                                points={lastScoreResult.totalPoints}
+                                                visible={lastScoreResult.totalPoints > 0}
+                                                style={{ flex: 1 }}
+                                            />
+                                        )}
+
+                                        <StreakCounter
+                                            streak={streak}
+                                            visible={streak > 0}
+                                            style={{ flex: 1, marginTop: 0 }}
                                         />
+                                    </View>
+
+                                    {/* Score display for wrong answer */}
+                                    {lastScoreResult && lastScoreResult.totalPoints === 0 && (
+                                        <Animated.Text entering={ZoomIn.delay(300)} style={[styles.deltaScore, { color: Colors.error, marginTop: 16 }]}>
+                                            MISS
+                                        </Animated.Text>
                                     )}
 
-                                    <StreakCounter
-                                        streak={streak}
-                                        visible={streak > 0}
-                                        style={{ minWidth: 100, marginTop: 0, flex: 1 }}
-                                    />
-                                </View>
-
-                                {/* Score display for wrong answer */}
-                                {lastScoreResult && lastScoreResult.totalPoints === 0 && (
-                                    <Animated.Text entering={ZoomIn.delay(300)} style={[styles.deltaScore, { color: Colors.error }]}>
-                                        MISS
-                                    </Animated.Text>
-                                )}
-
-                                {/* Buttons Row - Next Song Only */}
-                                <View style={{ width: '100%', marginTop: 24, alignItems: 'center' }}>
-                                    {isHost ? (
-                                        <GlassButton
-                                            title="NEXT SONG ▶"
-                                            onPress={handleNextRoundVote}
-                                            variant="success"
-                                            style={{
+                                    {/* Buttons Row - Next Song Only */}
+                                    <View style={{ width: '100%', marginTop: 20 }}>
+                                        {isHost ? (
+                                            <GlassButton
+                                                title="NEXT SONG ▶"
+                                                onPress={handleNextRoundVote}
+                                                variant="success"
+                                                style={{
+                                                    width: '100%',
+                                                    paddingVertical: 16,
+                                                    borderRadius: 12,
+                                                    borderWidth: 2,
+                                                }}
+                                                textStyle={{
+                                                    fontSize: 16,
+                                                    fontWeight: 'bold',
+                                                    letterSpacing: 1
+                                                }}
+                                            />
+                                        ) : (
+                                            <View style={{
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
                                                 width: '100%',
-                                                maxWidth: 350,
-                                                paddingVertical: 18,
+                                                paddingVertical: 16,
+                                                backgroundColor: 'rgba(255,255,255,0.05)',
                                                 borderRadius: 12,
                                                 borderWidth: 1,
-                                            }}
-                                            textStyle={{
-                                                fontSize: 18,
-                                                fontWeight: 'bold',
-                                                letterSpacing: 1
-                                            }}
-                                        />
-                                    ) : (
-                                        <View style={{
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            width: '100%',
-                                            maxWidth: 350,
-                                            paddingVertical: 18,
-                                            backgroundColor: 'rgba(255,255,255,0.05)',
-                                            borderRadius: 12,
-                                            borderWidth: 1,
-                                            borderColor: 'rgba(255,255,255,0.1)'
-                                        }}>
-                                            <Text style={{
-                                                color: Colors.textSecondary,
-                                                fontStyle: 'italic',
-                                                fontWeight: 'bold',
-                                            }}>Waiting for Host...</Text>
-                                        </View>
-                                    )}
+                                                borderColor: 'rgba(255,255,255,0.1)'
+                                            }}>
+                                                <Text style={{
+                                                    color: Colors.textSecondary,
+                                                    fontStyle: 'italic',
+                                                    fontWeight: 'bold',
+                                                }}>Waiting for Host...</Text>
+                                            </View>
+                                        )}
+                                    </View>
                                 </View>
                             </Animated.View>
                         ) : (
