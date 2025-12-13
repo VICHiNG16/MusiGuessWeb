@@ -233,7 +233,10 @@ export default function LobbyScreen() {
                 {/* Host can change artist */}
                 {isHost === 'true' && (
                     <Pressable
-                        onPress={() => router.replace('/')}
+                        onPress={() => {
+                            const currentUsername = username || (players.find(p => p.isHost)?.name || 'Host');
+                            router.replace(`/multiplayer?username=${encodeURIComponent(String(currentUsername))}`);
+                        }}
                         style={styles.changeArtistButton}
                     >
                         <Ionicons name="swap-horizontal" size={16} color={Colors.primary} />
