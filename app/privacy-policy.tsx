@@ -72,6 +72,68 @@ export default function PrivacyPolicy() {
                         </Text>
                     </Section>
 
+                    <Section title="6. Data Retention">
+                        <Text style={styles.text}>
+                            Game session data is retained only for the duration of gameplay and is automatically deleted when the game ends. We do not store long-term personal data about users.
+                        </Text>
+                        <Text style={styles.text}>
+                            Analytics data is retained in aggregated, anonymous form for up to 12 months to help us improve our services.
+                        </Text>
+                    </Section>
+
+                    <Section title="7. Your Rights Under GDPR (EU Users)">
+                        <Text style={styles.text}>
+                            If you are a resident of the European Economic Area (EEA), you have certain data protection rights under the General Data Protection Regulation (GDPR):
+                        </Text>
+                        <View style={styles.bulletList}>
+                            <Bullet>Right to Access: You can request copies of your personal data.</Bullet>
+                            <Bullet>Right to Rectification: You can request correction of inaccurate data.</Bullet>
+                            <Bullet>Right to Erasure: You can request deletion of your personal data.</Bullet>
+                            <Bullet>Right to Restrict Processing: You can request restriction of processing.</Bullet>
+                            <Bullet>Right to Data Portability: You can request transfer of your data.</Bullet>
+                            <Bullet>Right to Object: You can object to processing of your personal data.</Bullet>
+                        </View>
+                        <Text style={styles.text}>
+                            To exercise these rights, please contact us at contact@musiguess.live. We will respond within 30 days.
+                        </Text>
+                    </Section>
+
+                    <Section title="8. Your Rights Under CCPA (California Users)">
+                        <Text style={styles.text}>
+                            If you are a California resident, you have specific rights under the California Consumer Privacy Act (CCPA):
+                        </Text>
+                        <View style={styles.bulletList}>
+                            <Bullet>Right to Know: You can request disclosure of collected personal information.</Bullet>
+                            <Bullet>Right to Delete: You can request deletion of your personal information.</Bullet>
+                            <Bullet>Right to Opt-Out: You can opt out of the sale of your personal information.</Bullet>
+                            <Bullet>Right to Non-Discrimination: We will not discriminate against you for exercising your rights.</Bullet>
+                        </View>
+                        <Text style={styles.text}>
+                            We do not sell personal information. To exercise your rights, contact us at contact@musiguess.live.
+                        </Text>
+                    </Section>
+
+                    <Section title="9. Children's Privacy">
+                        <Text style={styles.text}>
+                            Our Service is not directed to children under 13. We do not knowingly collect personal information from children under 13. If you are a parent and believe your child has provided us with personal information, please contact us.
+                        </Text>
+                    </Section>
+
+                    <Section title="10. Security">
+                        <Text style={styles.text}>
+                            We use industry-standard security measures to protect your data, including encryption in transit (HTTPS) and secure database practices. However, no method of transmission over the Internet is 100% secure.
+                        </Text>
+                    </Section>
+
+                    <Section title="11. Contact Us">
+                        <Text style={styles.text}>
+                            If you have questions or concerns about this Privacy Policy or our data practices, please contact us at:
+                        </Text>
+                        <Text style={styles.text}>
+                            Email: contact@musiguess.live
+                        </Text>
+                    </Section>
+
                 </ScrollView>
             </SafeAreaView>
         </View>

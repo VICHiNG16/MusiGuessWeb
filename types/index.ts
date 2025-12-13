@@ -105,6 +105,11 @@ export interface ScoreResult {
 }
 
 /**
+ * Difficulty level
+ */
+export type Difficulty = 'easy' | 'normal' | 'hard' | 'extreme';
+
+/**
  * Difficulty settings
  */
 export interface DifficultySettings {
@@ -113,10 +118,10 @@ export interface DifficultySettings {
     label: string;
 }
 
-export const DIFFICULTY_PRESETS: Record<string, DifficultySettings> = {
-    easy: { timeLimit: 45, scoreMultiplier: 0.8, label: 'Easy' },
+export const DIFFICULTY_PRESETS: Record<Difficulty, DifficultySettings> = {
+    easy: { timeLimit: 40, scoreMultiplier: 0.8, label: 'Easy' },
     normal: { timeLimit: 30, scoreMultiplier: 1.0, label: 'Normal' },
-    hard: { timeLimit: 15, scoreMultiplier: 1.5, label: 'Hard' },
+    hard: { timeLimit: 20, scoreMultiplier: 1.5, label: 'Hard' },
     extreme: { timeLimit: 10, scoreMultiplier: 2.0, label: 'Extreme' },
 };
 

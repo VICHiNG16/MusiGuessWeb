@@ -10,6 +10,14 @@ import { fetchMusicData } from '../../utils/itunes';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { AdBanner } from '../../components/AdBanner';
+import { Difficulty } from '../../types';
+
+const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; description: string; color: string }[] = [
+    { value: 'easy', label: 'EASY', description: '40 seconds', color: Colors.success },
+    { value: 'normal', label: 'NORMAL', description: '30 seconds', color: Colors.primary },
+    { value: 'hard', label: 'HARD', description: '20 seconds', color: Colors.fast },
+    { value: 'extreme', label: 'EXTREME', description: '10 seconds', color: Colors.error },
+];
 
 export default function LobbyScreen() {
     const { id, isHost, artist, mode, artistImage, username } = useLocalSearchParams();
@@ -18,6 +26,7 @@ export default function LobbyScreen() {
     const [players, setPlayers] = useState<any[]>([]);
     const [error, setError] = useState('');
     const [roomData, setRoomData] = useState<any>(null);
+    const [difficulty, setDifficulty] = useState<Difficulty>('normal');
 
     const isSolo = mode === 'solo';
     const currentUid = auth.currentUser?.uid;
@@ -69,6 +78,7 @@ export default function LobbyScreen() {
                     artistImage: artistImage || '',
                     status: 'waiting',
                     mode: mode || 'multi',
+                    difficulty: 'normal',
                     createdAt: Date.now(),
                     players: {
                         [currentUid]: {
@@ -160,6 +170,7 @@ export default function LobbyScreen() {
                 status: 'playing',
                 songs: selected,
                 currentRound: 0,
+                difficulty: difficulty,
                 gameState: 'preview',
                 roundState: {
                     startedAt: Date.now(),
@@ -242,6 +253,39 @@ export default function LobbyScreen() {
                         <Ionicons name="swap-horizontal" size={16} color={Colors.primary} />
                         <Text style={styles.changeArtistText}>Change Artist</Text>
                     </Pressable>
+                )}
+
+                {/* Difficulty Selector - Host Only */}
+                {isHost === 'true' && (
+                    <View style={styles.difficultyContainer}>
+                        <Text style={styles.sectionHeader}>DIFFICULTY</Text>
+                        <View style={styles.difficultyOptions}>
+                            {DIFFICULTY_OPTIONS.map((opt) => (
+                                <Pressable
+                                    key={opt.value}
+                                    onPress={() => {
+                                        setDifficulty(opt.value);
+                                        update(ref(db, `rooms/${id}`), { difficulty: opt.value });
+                                    }}
+                                    style={[
+                                        styles.difficultyButton,
+                                        difficulty === opt.value && {
+                                            borderColor: opt.color,
+                                            backgroundColor: opt.color + '20'
+                                        }
+                                    ]}
+                                >
+                                    <Text style={[
+                                        styles.difficultyLabel,
+                                        difficulty === opt.value && { color: opt.color }
+                                    ]}>
+                                        {opt.label}
+                                    </Text>
+                                    <Text style={styles.difficultyDesc}>{opt.description}</Text>
+                                </Pressable>
+                            ))}
+                        </View>
+                    </View>
                 )}
 
                 <View style={styles.playerListContainer}>
@@ -358,5 +402,37 @@ const styles = StyleSheet.create({
     changeArtistText: {
         fontSize: 14,
         color: Colors.primary,
+    },
+    difficultyContainer: {
+        width: '100%',
+        maxWidth: 400,
+        marginVertical: 16,
+    },
+    difficultyOptions: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+        justifyContent: 'center',
+    },
+    difficultyButton: {
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        alignItems: 'center',
+        minWidth: 80,
+    },
+    difficultyLabel: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: Colors.textSecondary,
+        letterSpacing: 1,
+    },
+    difficultyDesc: {
+        fontSize: 10,
+        color: Colors.textSecondary,
+        marginTop: 2,
     },
 });

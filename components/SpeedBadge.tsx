@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
     useAnimatedStyle,
@@ -18,7 +18,7 @@ interface SpeedBadgeProps {
     visible: boolean;
 }
 
-export function SpeedBadge({ tier, points, visible }: SpeedBadgeProps) {
+function SpeedBadgeComponent({ tier, points, visible }: SpeedBadgeProps) {
     if (!visible) return null;
 
     const info = SPEED_TIER_INFO[tier];
@@ -36,6 +36,8 @@ export function SpeedBadge({ tier, points, visible }: SpeedBadgeProps) {
         </Animated.View>
     );
 }
+
+export const SpeedBadge = memo(SpeedBadgeComponent);
 
 const styles = StyleSheet.create({
     container: {

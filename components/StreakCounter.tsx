@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, {
     useAnimatedStyle,
@@ -9,7 +9,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect } from 'react';
 
 interface StreakCounterProps {
     streak: number;
@@ -19,7 +18,7 @@ interface StreakCounterProps {
 // Smooth easing for no-bounce effect
 const SMOOTH_EASING = Easing.out(Easing.cubic);
 
-export function StreakCounter({ streak, visible }: StreakCounterProps) {
+function StreakCounterComponent({ streak, visible }: StreakCounterProps) {
     const scale = useSharedValue(1);
 
     useEffect(() => {
@@ -74,6 +73,8 @@ export function StreakCounter({ streak, visible }: StreakCounterProps) {
         </Animated.View>
     );
 }
+
+export const StreakCounter = memo(StreakCounterComponent);
 
 const styles = StyleSheet.create({
     container: {
