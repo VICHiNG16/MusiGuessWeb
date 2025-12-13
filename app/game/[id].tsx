@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, ActivityIndicator, FlatList, useWindowDimensions, Linking, Vibration, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator, FlatList, useWindowDimensions, Linking, Vibration, Platform, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState, useRef } from 'react';
 import { Audio } from 'expo-av';
