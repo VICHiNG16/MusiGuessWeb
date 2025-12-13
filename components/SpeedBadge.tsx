@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     withSpring,
@@ -11,8 +11,6 @@ import Animated, {
 import { SpeedTier } from '../types';
 import { SPEED_TIER_INFO } from '../utils/scoring';
 import { Colors } from '../constants/Colors';
-
-import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 interface SpeedBadgeProps {
     tier: SpeedTier;

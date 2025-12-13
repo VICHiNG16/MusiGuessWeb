@@ -1,5 +1,5 @@
 import React, { memo, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import Animated, {
     useAnimatedStyle,
     withTiming,
@@ -9,8 +9,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-
-import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 interface StreakCounterProps {
     streak: number;
