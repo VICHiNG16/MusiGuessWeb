@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, Pressable, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, Pressable, Platform, useWindowDimensions, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { BackgroundGradient } from '../../components/BackgroundGradient';
@@ -14,6 +14,8 @@ import { AdBanner } from '../../components/AdBanner';
 export default function LobbyScreen() {
     const { id, isHost, artist, mode, artistImage, username } = useLocalSearchParams();
     const router = useRouter();
+    const { width } = useWindowDimensions();
+    const isMobile = width < 768;
     const [status, setStatus] = useState('waiting');
     const [players, setPlayers] = useState<any[]>([]);
     const [error, setError] = useState('');
@@ -213,11 +215,19 @@ export default function LobbyScreen() {
                 <Ionicons name="arrow-back" size={24} color={Colors.text} />
             </Pressable>
 
-            <View style={styles.content}>
+            <ScrollView
+                contentContainerStyle={[
+                    styles.content,
+                    isMobile && { paddingTop: 100, paddingHorizontal: 16 }
+                ]}
+                showsVerticalScrollIndicator={false}
+            >
                 <Text style={styles.title}>LOBBY</Text>
                 {!isSolo && (
-                    <Pressable onPress={copyRoomCode} style={styles.codeContainer}>
-                        <Text style={styles.code}>CODE: {id}</Text>
+                    <Pressable onPress={copyRoomCode} style={[styles.codeContainer, isMobile && { flexDirection: 'column', gap: 10 }]}>
+                        <Text style={[styles.code, isMobile && { fontSize: 32, letterSpacing: 2 }]}>
+                            {isMobile ? "CODE:" : "CODE: "}{id}
+                        </Text>
                         <View style={styles.copyButton}>
                             <Ionicons
                                 name={copied ? "checkmark" : "copy-outline"}
@@ -234,11 +244,11 @@ export default function LobbyScreen() {
                 {(roomData.artistImage || artistImage) && (
                     <Image
                         source={{ uri: (roomData.artistImage || artistImage) as string }}
-                        style={styles.artistArtwork}
+                        style={[styles.artistArtwork, isMobile && { width: 160, height: 160 }]}
                     />
                 )}
 
-                <Text style={styles.artistLabel}><Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 24 }}>{roomData.artist}</Text></Text>
+                <Text style={styles.artistLabel}><Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: isMobile ? 20 : 24 }}>{roomData.artist}</Text></Text>
 
                 {/* Host can change artist (Multiplayer only) */}
                 {isHost === 'true' && !isSolo && (
@@ -254,14 +264,15 @@ export default function LobbyScreen() {
                     </Pressable>
                 )}
 
-                <View style={styles.playerListContainer}>
+                <View style={[styles.playerListContainer, isMobile && { minWidth: '100%' }]}>
                     <Text style={styles.sectionHeader}>Players ({players.length}/6)</Text>
                     <FlatList
                         data={players.sort((a, b) => a.joinedAt - b.joinedAt)}
                         renderItem={renderPlayer}
                         keyExtractor={item => item.uid}
                         contentContainerStyle={{ gap: 10 }}
-                        style={{ width: '100%', maxHeight: 300, minWidth: 300 }}
+                        style={{ width: '100%', maxHeight: 300 }}
+                        scrollEnabled={false} // Nested inside ScrollView
                     />
                 </View>
 
@@ -273,7 +284,7 @@ export default function LobbyScreen() {
                     <GlassButton
                         title={status === 'loading' ? "Starting..." : "START GAME"}
                         onPress={startGame}
-                        style={{ marginTop: 40, width: 280 }}
+                        style={{ marginTop: 40, width: 280, marginBottom: 40 }}
                     />
                 ) : (
                     isHost === 'true' ? (
@@ -282,7 +293,7 @@ export default function LobbyScreen() {
                         <Text style={styles.waitingMsg}>Waiting for host to start...</Text>
                     )
                 )}
-            </View>
+            </ScrollView>
         </View>
     );
 }
