@@ -1,0 +1,35 @@
+{
+    "rules": {
+        "rooms": {
+            "$roomId": {
+                // Authenticated users can read room data
+                ".read": "auth != null",
+                // Host Control & Creation:
+                // 1. Auth required
+                // 2. New room (!data.exists) OR Host is current user
+                ".write": "auth != null && (!data.exists() || data.child('hostUid').val() === auth.uid)",
+                "players": {
+                    "$uid": {
+                        // Players can self-manage their entry (join, update score?)
+                        // Note: Host already has write access from parent, so this ADDS access for the specific player.
+                        ".write": "auth != null && $uid === auth.uid"
+                    }
+                },
+                "roundState": {
+                    "guesses": {
+                        "$uid": {
+                            // Players submit their own guesses
+                            ".write": "auth != null && $uid === auth.uid"
+                        }
+                    },
+                    "votes": {
+                        "$uid": {
+                            // Players submit their own votes
+                            ".write": "auth != null && $uid === auth.uid"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

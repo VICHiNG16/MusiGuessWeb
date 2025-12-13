@@ -75,8 +75,12 @@ export default function MultiplayerScreen() {
             return;
         }
 
+        // Create NEW room
+        const artistData = searchResults.find(r => r.artistName === selectedArtist);
+        const image = artistData ? artistData.image : '';
+
         const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-        router.push(`/lobby/${newRoomId}?isHost=true&mode=multi&artist=${encodeURIComponent(selectedArtist)}&username=${encodeURIComponent(String(username))}`);
+        router.push(`/lobby/${newRoomId}?isHost=true&mode=multi&artist=${encodeURIComponent(selectedArtist)}&artistImage=${encodeURIComponent(image)}&username=${encodeURIComponent(String(username))}`);
     };
 
     const joinRoom = () => {
