@@ -579,26 +579,43 @@ export default function GameScreen() {
                                     </Animated.Text>
                                 )}
 
-                                {/* Buttons Row */}
-                                <View style={{ flexDirection: 'row', gap: 12, marginTop: 30, flexWrap: 'wrap', justifyContent: 'center' }}>
-                                    {currentSong?.trackViewUrl && (
-                                        <GlassButton
-                                            title={isMobile ? "Apple Music 🎵" : "Listen on Apple Music 🎵"}
-                                            onPress={() => Linking.openURL(currentSong.trackViewUrl)}
-                                            style={{ backgroundColor: 'rgba(250, 35, 59, 0.2)', borderColor: '#fa233b', minWidth: 140 }}
-                                        />
-                                    )}
-
+                                {/* Buttons Row - Next Song Only */}
+                                <View style={{ width: '100%', marginTop: 24, alignItems: 'center' }}>
                                     {isHost ? (
                                         <GlassButton
-                                            title="▶ Next Song"
+                                            title="NEXT SONG ▶"
                                             onPress={handleNextRoundVote}
                                             variant="success"
-                                            style={{ minWidth: 140, paddingVertical: 14 }}
+                                            style={{
+                                                width: '100%',
+                                                maxWidth: 350,
+                                                paddingVertical: 18,
+                                                borderRadius: 12,
+                                                borderWidth: 1,
+                                            }}
+                                            textStyle={{
+                                                fontSize: 18,
+                                                fontWeight: 'bold',
+                                                letterSpacing: 1
+                                            }}
                                         />
                                     ) : (
-                                        <View style={{ justifyContent: 'center', height: 50, paddingHorizontal: 20, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12 }}>
-                                            <Text style={{ color: Colors.textSecondary, fontStyle: 'italic' }}>Waiting for Host...</Text>
+                                        <View style={{
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            width: '100%',
+                                            maxWidth: 350,
+                                            paddingVertical: 18,
+                                            backgroundColor: 'rgba(255,255,255,0.05)',
+                                            borderRadius: 12,
+                                            borderWidth: 1,
+                                            borderColor: 'rgba(255,255,255,0.1)'
+                                        }}>
+                                            <Text style={{
+                                                color: Colors.textSecondary,
+                                                fontStyle: 'italic',
+                                                fontWeight: 'bold',
+                                            }}>Waiting for Host...</Text>
                                         </View>
                                     )}
                                 </View>
