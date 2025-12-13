@@ -292,18 +292,6 @@ export default function HomeScreen() {
 
     const renderHeader = () => (
         <View style={styles.header}>
-            {/* Back Button - Always top left when not on menu */}
-            {viewMode !== 'MENU' && (
-                <Pressable
-                    onPress={() => setViewMode('MENU')}
-                    style={styles.topLeftBackButton}
-                    accessibilityLabel="Go back to menu"
-                    accessibilityRole="button"
-                >
-                    <Ionicons name="arrow-back" size={22} color={Colors.text} />
-                </Pressable>
-            )}
-
             {/* Logo and Title */}
             <View style={styles.logoContainer}>
                 <Image
@@ -325,6 +313,17 @@ export default function HomeScreen() {
         <View style={styles.container}>
             <BackgroundGradient />
             <SafeAreaView style={styles.content}>
+                {viewMode !== 'MENU' && (
+                    <Pressable
+                        onPress={() => setViewMode('MENU')}
+                        style={styles.topLeftBackButton}
+                        accessibilityLabel="Go back to menu"
+                        accessibilityRole="button"
+                    >
+                        <Ionicons name="arrow-back" size={22} color={Colors.text} />
+                    </Pressable>
+                )}
+
                 <Pressable
                     onPress={() => setSettingsVisible(true)}
                     style={{ position: 'absolute', top: 50, right: 20, zIndex: 10 }}
@@ -416,8 +415,8 @@ const styles = StyleSheet.create({
     },
     topLeftBackButton: {
         position: 'absolute',
-        top: 0,
-        left: 0,
+        top: 50,
+        left: 20,
         padding: 10,
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
         borderRadius: 12,
