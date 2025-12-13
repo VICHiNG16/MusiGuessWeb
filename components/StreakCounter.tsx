@@ -52,14 +52,7 @@ function StreakCounterComponent({ streak, visible, style }: StreakCounterProps) 
                 isLegendary && styles.legendary
             ]}
         >
-            style={[
-                styles.container,
-                style,
-                animatedStyle,
-                isOnFire && styles.onFire,
-                isLegendary && styles.legendary
-            ]}
-        >
+
             <View style={styles.topRow}>
                 <View style={styles.iconContainer}>
                     {isLegendary ? (
