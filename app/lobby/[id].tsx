@@ -231,8 +231,8 @@ export default function LobbyScreen() {
 
                 <Text style={styles.artistLabel}><Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: 24 }}>{roomData.artist}</Text></Text>
 
-                {/* Host can change artist */}
-                {isHost === 'true' && (
+                {/* Host can change artist (Multiplayer only) */}
+                {isHost === 'true' && !isSolo && (
                     <Pressable
                         onPress={() => {
                             const currentUsername = username || (players.find(p => p.isHost)?.name || 'Host');
