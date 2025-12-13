@@ -106,7 +106,7 @@ export default function HomeScreen() {
             <View>
                 <TextInput
                     style={[styles.input, selectedArtist ? { borderColor: Colors.primary, color: Colors.primary } : {}]}
-                    placeholder="Search Artist (e.g. The Weeknd)"
+                    placeholder="Search Artist"
                     placeholderTextColor={Colors.textSecondary}
                     value={artistQuery}
                     onChangeText={(t) => {
