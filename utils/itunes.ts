@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 export interface Song {
     trackId: number;
     trackName: string;
@@ -20,10 +22,38 @@ function appendAffiliateToken(url: string): string {
     return `${url}${separator}at=${AFFILIATE_TOKEN}`;
 }
 
+// JSONP Helper for Web CORS
+async function fetchItunes(url: string): Promise<any> {
+    if (Platform.OS === 'web') {
+        return new Promise((resolve, reject) => {
+            const callbackName = 'jsonp_' + Math.round(100000 * Math.random());
+            const script = document.createElement('script');
+
+            // Add callback to window
+            (window as any)[callbackName] = (data: any) => {
+                delete (window as any)[callbackName];
+                document.body.removeChild(script);
+                resolve(data);
+            };
+
+            script.src = `${url}&callback=${callbackName}`;
+            script.onerror = () => {
+                delete (window as any)[callbackName];
+                document.body.removeChild(script);
+                reject(new Error('JSONP Request Failed'));
+            };
+
+            document.body.appendChild(script);
+        });
+    } else {
+        const response = await fetch(url);
+        return await response.json();
+    }
+}
+
 export async function fetchMusicData(artist: string): Promise<Song[]> {
     try {
-        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&entity=song&limit=50`);
-        const data = await response.json();
+        const data = await fetchItunes(`https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&entity=song&limit=50`);
 
         // Filter out songs without previewUrl
         const songs = data.results.filter((s: any) => s.previewUrl && s.kind === 'song');
@@ -46,8 +76,7 @@ export async function searchArtists(query: string) {
     if (!query || query.length < 2) return [];
     try {
         // Search albums to get artwork (artist entity doesn't have images)
-        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&attribute=artistTerm&limit=20`);
-        const data = await response.json();
+        const data = await fetchItunes(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=album&attribute=artistTerm&limit=20`);
 
         // Deduplicate artists
         const uniqueArtists = new Map();
