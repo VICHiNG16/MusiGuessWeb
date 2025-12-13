@@ -12,13 +12,16 @@ import { SpeedTier } from '../types';
 import { SPEED_TIER_INFO } from '../utils/scoring';
 import { Colors } from '../constants/Colors';
 
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+
 interface SpeedBadgeProps {
     tier: SpeedTier;
     points: number;
     visible: boolean;
+    style?: StyleProp<ViewStyle>;
 }
 
-function SpeedBadgeComponent({ tier, points, visible }: SpeedBadgeProps) {
+function SpeedBadgeComponent({ tier, points, visible, style }: SpeedBadgeProps) {
     if (!visible) return null;
 
     const info = SPEED_TIER_INFO[tier];
@@ -26,7 +29,7 @@ function SpeedBadgeComponent({ tier, points, visible }: SpeedBadgeProps) {
     return (
         <Animated.View
             entering={ZoomIn.springify().damping(12)}
-            style={[styles.container, { backgroundColor: info.color + '30', borderColor: info.color }]}
+            style={[styles.container, { backgroundColor: info.color + '30', borderColor: info.color }, style]}
         >
             <Text style={styles.emoji}>{info.emoji}</Text>
             <View style={styles.textContainer}>

@@ -517,120 +517,137 @@ export default function GameScreen() {
                 )}
 
                 {/* Right: Game Area */}
-                <View style={styles.mainArea}>
-                    {/* Round Progress */}
-                    <View style={styles.roundProgress}>
-                        <Text style={styles.roundText}>
-                            ROUND {(gameData?.currentRound || 0) + 1} / {gameData?.songs?.length || 5}
-                        </Text>
-                        <View style={styles.progressBar}>
-                            <View
-                                style={[
-                                    styles.progressFill,
-                                    { width: `${(((gameData?.currentRound || 0) + 1) / (gameData?.songs?.length || 5)) * 100}%` }
-                                ]}
-                            />
+                <ScrollView
+                    style={{ flex: 1, width: '100%' }}
+                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={{ width: '100%', maxWidth: 800, alignItems: 'center' }}>
+                        {/* Round Progress */}
+                        <View style={styles.roundProgress}>
+                            <Text style={styles.roundText}>
+                                ROUND {(gameData?.currentRound || 0) + 1} / {gameData?.songs?.length || 5}
+                            </Text>
+                            <View style={styles.progressBar}>
+                                <View
+                                    style={[
+                                        styles.progressFill,
+                                        { width: `${(((gameData?.currentRound || 0) + 1) / (gameData?.songs?.length || 5)) * 100}%` }
+                                    ]}
+                                />
+                            </View>
                         </View>
-                    </View>
 
-                    {/* Mobile Timer */}
-                    {isMobile && (
-                        <View style={styles.mobileTimer}>
-                            <Text style={styles.timerSmall}>{timeRemaining}</Text>
-                        </View>
-                    )}
+                        {/* Mobile Timer */}
+                        {isMobile && (
+                            <View style={styles.mobileTimer}>
+                                <Text style={styles.timerSmall}>{timeRemaining}</Text>
+                            </View>
+                        )}
 
-                    {isReveal ? (
-                        <Animated.View entering={FadeInUp.springify()} style={styles.revealContainer}>
-                            <Image
-                                source={{ uri: currentSong.artworkUrl100 }}
-                                style={styles.artwork}
-                            />
-                            <Text style={styles.songTitle}>{currentSong.trackName}</Text>
-                            <Text style={styles.artistName}>{currentSong.artistName}</Text>
-
-                            {/* New Speed Badge */}
-                            {lastScoreResult && (
-                                <SpeedBadge
-                                    tier={lastScoreResult.speedTier}
-                                    points={lastScoreResult.totalPoints}
-                                    visible={lastScoreResult.totalPoints > 0}
+                        {isReveal ? (
+                            <Animated.View entering={FadeInUp.springify()} style={styles.revealContainer}>
+                                <Image
+                                    source={{ uri: currentSong.artworkUrl100 }}
+                                    style={styles.artwork}
                                 />
-                            )}
+                                <Text style={styles.songTitle}>{currentSong.trackName}</Text>
+                                <Text style={styles.artistName}>{currentSong.artistName}</Text>
 
-                            {/* Score display for wrong answer */}
-                            {lastScoreResult && lastScoreResult.totalPoints === 0 && (
-                                <Animated.Text entering={ZoomIn.delay(300)} style={[styles.deltaScore, { color: Colors.error }]}>
-                                    MISS
-                                </Animated.Text>
-                            )}
+                                {/* New Speed Badge & Streak Row */}
+                                <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginTop: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+                                    {lastScoreResult && (
+                                        <SpeedBadge
+                                            tier={lastScoreResult.speedTier}
+                                            points={lastScoreResult.totalPoints}
+                                            visible={lastScoreResult.totalPoints > 0}
+                                            style={{ height: 60 }}
+                                        />
+                                    )}
 
-                            {/* Streak Counter */}
-                            <StreakCounter streak={streak} visible={streak > 0} />
-
-                            {currentSong?.trackViewUrl && (
-                                <GlassButton
-                                    title="Listen on Apple Music 🎵"
-                                    onPress={() => Linking.openURL(currentSong.trackViewUrl)}
-                                    style={{ marginTop: 20, backgroundColor: 'rgba(250, 35, 59, 0.2)', borderColor: '#fa233b', width: 250 }}
-                                />
-                            )}
-
-                            {isHost ? (
-                                <GlassButton
-                                    title="▶ Next Song"
-                                    onPress={handleNextRoundVote}
-                                    variant="success"
-                                    style={{ marginTop: 30, width: '100%', maxWidth: 280, paddingVertical: 18 }}
-                                />
-                            ) : (
-                                <Text style={styles.waitingTextReveal}>Waiting for Host...</Text>
-                            )}
-                        </Animated.View>
-                    ) : (
-                        <View style={styles.gameplayContainer}>
-                            <GlassButton
-                                title={isPlaying ? "PAUSE MUSIC" : "PLAY MUSIC"}
-                                onPress={toggleMusic}
-                                style={{ marginBottom: 30, width: 160 }}
-                            />
-
-                            {hasGuessed ? (
-                                <Animated.View entering={FadeIn} style={styles.waitingContainer}>
-                                    <ActivityIndicator size="large" color={Colors.primary} />
-                                    <Text style={styles.waitingText}>Waiting for other players...</Text>
-                                </Animated.View>
-                            ) : (
-                                <View style={styles.optionsGrid}>
-                                    <View style={styles.row}>
-                                        {currentSong.options?.slice(0, 2).map((option: any, idx: number) => (
-                                            <SongCard
-                                                key={idx}
-                                                title={option.trackName}
-                                                artwork={option.artworkUrl100}
-                                                onPress={() => handleGuess(option.trackName)}
-                                                disabled={hasGuessed}
-                                                style={{ flex: 1 }}
-                                            />
-                                        ))}
-                                    </View>
-                                    <View style={styles.row}>
-                                        {currentSong.options?.slice(2, 4).map((option: any, idx: number) => (
-                                            <SongCard
-                                                key={idx + 2}
-                                                title={option.trackName}
-                                                artwork={option.artworkUrl100}
-                                                onPress={() => handleGuess(option.trackName)}
-                                                disabled={hasGuessed}
-                                                style={{ flex: 1 }}
-                                            />
-                                        ))}
-                                    </View>
+                                    <StreakCounter
+                                        streak={streak}
+                                        visible={streak > 0}
+                                        style={{ height: 60, marginTop: 0 }}
+                                    />
                                 </View>
-                            )}
-                        </View>
-                    )}
-                </View>
+
+                                {/* Score display for wrong answer */}
+                                {lastScoreResult && lastScoreResult.totalPoints === 0 && (
+                                    <Animated.Text entering={ZoomIn.delay(300)} style={[styles.deltaScore, { color: Colors.error }]}>
+                                        MISS
+                                    </Animated.Text>
+                                )}
+
+                                {/* Buttons Row */}
+                                <View style={{ flexDirection: 'row', gap: 12, marginTop: 30, flexWrap: 'wrap', justifyContent: 'center' }}>
+                                    {currentSong?.trackViewUrl && (
+                                        <GlassButton
+                                            title={isMobile ? "Apple Music 🎵" : "Listen on Apple Music 🎵"}
+                                            onPress={() => Linking.openURL(currentSong.trackViewUrl)}
+                                            style={{ backgroundColor: 'rgba(250, 35, 59, 0.2)', borderColor: '#fa233b', minWidth: 140 }}
+                                        />
+                                    )}
+
+                                    {isHost ? (
+                                        <GlassButton
+                                            title="▶ Next Song"
+                                            onPress={handleNextRoundVote}
+                                            variant="success"
+                                            style={{ minWidth: 140, paddingVertical: 14 }}
+                                        />
+                                    ) : (
+                                        <View style={{ justifyContent: 'center', height: 50, paddingHorizontal: 20, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12 }}>
+                                            <Text style={{ color: Colors.textSecondary, fontStyle: 'italic' }}>Waiting for Host...</Text>
+                                        </View>
+                                    )}
+                                </View>
+                            </Animated.View>
+                        ) : (
+                            <View style={styles.gameplayContainer}>
+                                <GlassButton
+                                    title={isPlaying ? "PAUSE MUSIC" : "PLAY MUSIC"}
+                                    onPress={toggleMusic}
+                                    style={{ marginBottom: 30, width: 160 }}
+                                />
+
+                                {hasGuessed ? (
+                                    <Animated.View entering={FadeIn} style={styles.waitingContainer}>
+                                        <ActivityIndicator size="large" color={Colors.primary} />
+                                        <Text style={styles.waitingText}>Waiting for other players...</Text>
+                                    </Animated.View>
+                                ) : (
+                                    <View style={styles.optionsGrid}>
+                                        <View style={styles.row}>
+                                            {currentSong.options?.slice(0, 2).map((option: any, idx: number) => (
+                                                <SongCard
+                                                    key={idx}
+                                                    title={option.trackName}
+                                                    artwork={option.artworkUrl100}
+                                                    onPress={() => handleGuess(option.trackName)}
+                                                    disabled={hasGuessed}
+                                                    style={{ flex: 1 }}
+                                                />
+                                            ))}
+                                        </View>
+                                        <View style={styles.row}>
+                                            {currentSong.options?.slice(2, 4).map((option: any, idx: number) => (
+                                                <SongCard
+                                                    key={idx + 2}
+                                                    title={option.trackName}
+                                                    artwork={option.artworkUrl100}
+                                                    onPress={() => handleGuess(option.trackName)}
+                                                    disabled={hasGuessed}
+                                                    style={{ flex: 1 }}
+                                                />
+                                            ))}
+                                        </View>
+                                    </View>
+                                )}
+                            </View>
+                        )}
+                    </View>
+                </ScrollView>
             </View>
         </View>
     );
@@ -676,8 +693,8 @@ const styles = StyleSheet.create({
     row: { flexDirection: 'row', gap: 12, height: '45%' },
 
     // Reveal
-    revealContainer: { alignItems: 'center', width: '100%' },
-    artwork: { width: 280, height: 280, borderRadius: 20, marginBottom: 30, borderWidth: 2, borderColor: Colors.surfaceHighlight },
+    revealContainer: { alignItems: 'center', width: '100%', paddingBottom: 40 },
+    artwork: { width: 200, height: 200, borderRadius: 20, marginBottom: 20, borderWidth: 2, borderColor: Colors.surfaceHighlight },
     songTitle: { color: Colors.text, fontSize: 28, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
     artistName: { color: Colors.primary, fontSize: 20, marginBottom: 30 },
     deltaScore: { fontSize: 48, fontWeight: '900', textShadowColor: 'rgba(0,0,0,0.5)', textShadowRadius: 10 },

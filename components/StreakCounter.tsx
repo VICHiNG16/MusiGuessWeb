@@ -10,15 +10,18 @@ import Animated, {
 import { Colors } from '../constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 
+import { View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+
 interface StreakCounterProps {
     streak: number;
     visible: boolean;
+    style?: StyleProp<ViewStyle>;
 }
 
 // Smooth easing for no-bounce effect
 const SMOOTH_EASING = Easing.out(Easing.cubic);
 
-function StreakCounterComponent({ streak, visible }: StreakCounterProps) {
+function StreakCounterComponent({ streak, visible, style }: StreakCounterProps) {
     const scale = useSharedValue(1);
 
     useEffect(() => {
@@ -45,6 +48,7 @@ function StreakCounterComponent({ streak, visible }: StreakCounterProps) {
             entering={FadeIn.duration(200)}
             style={[
                 styles.container,
+                style,
                 animatedStyle,
                 isOnFire && styles.onFire,
                 isLegendary && styles.legendary
@@ -85,7 +89,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         borderWidth: 1,
         borderColor: Colors.primary,
-        marginTop: 16,
     },
     onFire: {
         backgroundColor: 'rgba(255, 107, 53, 0.15)',
