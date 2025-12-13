@@ -433,22 +433,20 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         backgroundColor: '#1E1E24',
-        padding: 20,
-        flexDirection: 'row',
+        padding: 24,
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         borderTopWidth: 1,
         borderTopColor: 'rgba(255,255,255,0.1)',
         zIndex: 100,
-        flexWrap: 'wrap',
-        gap: 10
+        gap: 16
     },
     cookieText: {
         color: Colors.textSecondary,
         fontSize: 12,
-        flex: 1,
-        marginRight: 20,
-        minWidth: 200
+        textAlign: 'center',
+        marginBottom: 8,
+        maxWidth: 600
     },
     footer: {
         width: '100%',
