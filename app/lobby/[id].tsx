@@ -222,33 +222,14 @@ export default function LobbyScreen() {
                 ]}
                 showsVerticalScrollIndicator={false}
             >
-                <Text style={styles.title}>LOBBY</Text>
-                {!isSolo && (
-                    <Pressable onPress={copyRoomCode} style={[styles.codeContainer, isMobile && { flexDirection: 'column', gap: 10 }]}>
-                        <Text style={[styles.code, isMobile && { fontSize: 32, letterSpacing: 2 }]}>
-                            {isMobile ? "CODE:" : "CODE: "}{id}
-                        </Text>
-                        <View style={styles.copyButton}>
-                            <Ionicons
-                                name={copied ? "checkmark" : "copy-outline"}
-                                size={18}
-                                color={copied ? Colors.success : Colors.primary}
-                            />
-                            <Text style={[styles.copyText, copied && { color: Colors.success }]}>
-                                {copied ? 'Copied!' : 'Copy'}
-                            </Text>
-                        </View>
-                    </Pressable>
-                )}
-
                 {(roomData.artistImage || artistImage) && (
                     <Image
                         source={{ uri: (roomData.artistImage || artistImage) as string }}
-                        style={[styles.artistArtwork, isMobile && { width: 160, height: 160 }]}
+                        style={[styles.artistArtwork, isMobile && { width: 140, height: 140, marginTop: 40 }]}
                     />
                 )}
 
-                <Text style={styles.artistLabel}><Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: isMobile ? 20 : 24 }}>{roomData.artist}</Text></Text>
+                <Text style={styles.artistLabel}><Text style={{ color: Colors.primary, fontWeight: 'bold', fontSize: isMobile ? 24 : 32 }}>{roomData.artist}</Text></Text>
 
                 {/* Host can change artist (Multiplayer only) */}
                 {isHost === 'true' && !isSolo && (
@@ -264,27 +245,26 @@ export default function LobbyScreen() {
                     </Pressable>
                 )}
 
-                <View style={[styles.playerListContainer, isMobile && { minWidth: '100%' }]}>
+                <View style={[styles.playerListContainer, isMobile && { minWidth: '100%', padding: 10 }]}>
                     <Text style={styles.sectionHeader}>Players ({players.length}/6)</Text>
                     <FlatList
                         data={players.sort((a, b) => a.joinedAt - b.joinedAt)}
                         renderItem={renderPlayer}
                         keyExtractor={item => item.uid}
-                        contentContainerStyle={{ gap: 10 }}
-                        style={{ width: '100%', maxHeight: 300 }}
-                        scrollEnabled={false} // Nested inside ScrollView
+                        contentContainerStyle={{ gap: 8 }}
+                        style={{ width: '100%' }}
+                        scrollEnabled={false}
                     />
                 </View>
 
                 {error ? <Text style={styles.error}>{error}</Text> : null}
 
-                <AdBanner style={{ marginTop: 20 }} />
-
                 {(isHost === 'true' && (players.length > 1 || isSolo)) ? (
                     <GlassButton
                         title={status === 'loading' ? "Starting..." : "START GAME"}
                         onPress={startGame}
-                        style={{ marginTop: 40, width: 280, marginBottom: 40 }}
+                        style={{ marginTop: 20, width: '100%', maxWidth: 300, marginBottom: 20 }}
+                        variant='success'
                     />
                 ) : (
                     isHost === 'true' ? (
@@ -292,6 +272,23 @@ export default function LobbyScreen() {
                     ) : (
                         <Text style={styles.waitingMsg}>Waiting for host to start...</Text>
                     )
+                )}
+
+                <AdBanner style={{ marginVertical: 10 }} />
+
+                {!isSolo && (
+                    <Pressable onPress={copyRoomCode} style={[styles.codeContainer, isMobile && { flexDirection: 'row', padding: 8, marginTop: 10, alignSelf: 'center', marginBottom: 40 }]}>
+                        <Text style={[styles.code, isMobile && { fontSize: 20, marginBottom: 0, letterSpacing: 1 }]}>
+                            CODE: {id}
+                        </Text>
+                        <View style={[styles.copyButton, isMobile && { padding: 4 }]}>
+                            <Ionicons
+                                name={copied ? "checkmark" : "copy-outline"}
+                                size={14}
+                                color={copied ? Colors.success : Colors.primary}
+                            />
+                        </View>
+                    </Pressable>
                 )}
             </ScrollView>
         </View>
