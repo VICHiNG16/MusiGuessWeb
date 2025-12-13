@@ -246,7 +246,7 @@ export default function LobbyScreen() {
                 )}
 
                 <View style={[styles.playerListContainer, isMobile && { minWidth: '100%', padding: 10 }]}>
-                    <Text style={styles.sectionHeader}>Players ({players.length}/6)</Text>
+                    <Text style={styles.sectionHeader}>{isSolo ? "Player" : `Players (${players.length}/6)`}</Text>
                     <FlatList
                         key={players.length > 3 ? 'grid' : 'list'}
                         data={players.sort((a, b) => a.joinedAt - b.joinedAt)}
