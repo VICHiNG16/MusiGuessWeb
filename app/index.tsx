@@ -216,7 +216,7 @@ export default function HomeScreen() {
                 <ScrollView
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
-                    style={{ width: '100%' }}
+                    style={{ width: '100%', flex: 1 }}
                 >
                     {renderHeader()}
 
