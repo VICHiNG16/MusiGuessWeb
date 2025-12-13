@@ -123,10 +123,12 @@ const styles = StyleSheet.create({
         cursor: 'not-allowed' as any,
     },
     blur: {
-        paddingVertical: 16,
-        paddingHorizontal: 32,
+        flex: 1,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
         alignItems: 'center',
         justifyContent: 'center',
+        width: '100%',
     },
     text: {
         color: Colors.text,

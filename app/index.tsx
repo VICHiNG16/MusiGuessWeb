@@ -218,7 +218,7 @@ export default function HomeScreen() {
                     <GlassButton
                         title="Accept All"
                         onPress={handleAcceptCookies}
-                        style={{ height: 40, paddingHorizontal: 20 }}
+                        style={{ minWidth: 120 }}
                         textStyle={{ fontSize: 14 }}
                     />
                 </View>
