@@ -42,6 +42,7 @@ export default function GameScreen() {
     const [streak, setStreak] = useState(0);
     const [lastScoreResult, setLastScoreResult] = useState<ScoreResult | null>(null);
     const [showConfetti, setShowConfetti] = useState(false);
+    const [shareCopied, setShareCopied] = useState(false);
 
     // Derived State
     const isReveal = gameData?.gameState === 'reveal';
@@ -365,6 +366,28 @@ export default function GameScreen() {
         const winner = players[0];
         const isWinner = winner.uid === currentUid;
 
+        const shareResults = async () => {
+            const myFinalScore = myPlayer?.score || 0;
+            const myRank = players.findIndex(p => p.uid === currentUid) + 1;
+            const totalPlayers = players.length;
+
+            const shareText = `🎵 MusiGuess Results 🎵\n\n` +
+                `Artist: ${gameData.artist}\n` +
+                `Score: ${myFinalScore.toLocaleString()} pts\n` +
+                `Rank: #${myRank}/${totalPlayers}\n\n` +
+                `Play now at musiguess.live`;
+
+            if (Platform.OS === 'web') {
+                try {
+                    await navigator.clipboard.writeText(shareText);
+                    setShareCopied(true);
+                    setTimeout(() => setShareCopied(false), 2000);
+                } catch (e) {
+                    console.error('Failed to copy:', e);
+                }
+            }
+        };
+
         return (
             <View style={styles.container}>
                 <BackgroundGradient />
@@ -391,7 +414,13 @@ export default function GameScreen() {
                         />
                     )}
 
-                    <GlassButton title="Return to Lobby" onPress={() => router.replace('/')} style={{ marginTop: 40 }} />
+                    <GlassButton
+                        title={shareCopied ? "Copied! ✓" : "Share Results 📋"}
+                        onPress={shareResults}
+                        variant={shareCopied ? "success" : "secondary"}
+                        style={{ marginTop: 20 }}
+                    />
+                    <GlassButton title="Return to Lobby" onPress={() => router.replace('/')} style={{ marginTop: 15 }} />
                     <AdBanner style={{ marginTop: 30 }} />
                 </View>
             </View>
