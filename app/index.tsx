@@ -95,7 +95,7 @@ export default function HomeScreen() {
                 description="Host a game or join a friend's lobby."
                 icon="people"
                 iconColor="#0A84FF"
-                onPress={() => setViewMode('MULTI')}
+                onPress={() => router.push('/username')}
             />
         </Animated.View>
     );
