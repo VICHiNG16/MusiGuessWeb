@@ -473,17 +473,25 @@ export default function GameScreen() {
             <Confetti active={showConfetti} />
 
             <View style={{ flex: 1, flexDirection: isMobile ? 'column' : 'row' }}>
-                {/* Left: Leaderboard (Desktop) or Top (Mobile) */}
-                <View style={isMobile ? styles.mobileHeader : styles.sidebar}>
-                    <Text style={styles.sidebarTitle}>LEADERBOARD</Text>
-                    <FlatList
-                        data={players}
-                        renderItem={renderLeaderboardItem}
-                        keyExtractor={item => item.uid}
-                        style={{ flex: 1, width: '100%' }}
-                        contentContainerStyle={{ gap: 8 }}
-                    />
-                    {!isMobile && (
+                {/* Left: Leaderboard (Desktop) or Compact Header (Mobile) */}
+                {isMobile ? (
+                    <View style={styles.mobileHeader}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                            <Text style={{ color: Colors.textSecondary, fontSize: 12, fontWeight: 'bold' }}>#{players.findIndex(p => p.uid === currentUid) + 1}</Text>
+                            <Text style={{ color: Colors.text, fontWeight: 'bold' }} numberOfLines={1}>{myPlayer?.name || 'You'}</Text>
+                        </View>
+                        <Text style={{ color: Colors.primary, fontWeight: '900', fontSize: 18 }}>{myPlayer?.score || 0}</Text>
+                    </View>
+                ) : (
+                    <View style={styles.sidebar}>
+                        <Text style={styles.sidebarTitle}>LEADERBOARD</Text>
+                        <FlatList
+                            data={players}
+                            renderItem={renderLeaderboardItem}
+                            keyExtractor={item => item.uid}
+                            style={{ flex: 1, width: '100%' }}
+                            contentContainerStyle={{ gap: 8 }}
+                        />
                         <View style={{ marginTop: 20, alignItems: 'center' }}>
                             <Text style={styles.timer}>{timeRemaining}</Text>
                             <Text style={{ color: Colors.textSecondary }}>SECONDS</Text>
@@ -505,8 +513,8 @@ export default function GameScreen() {
                                 </View>
                             )}
                         </View>
-                    )}
-                </View>
+                    </View>
+                )}
 
                 {/* Right: Game Area */}
                 <View style={styles.mainArea}>
@@ -569,7 +577,12 @@ export default function GameScreen() {
                             )}
 
                             {isHost ? (
-                                <GlassButton title="Next Song" onPress={handleNextRoundVote} style={{ marginTop: 40 }} />
+                                <GlassButton
+                                    title="▶ Next Song"
+                                    onPress={handleNextRoundVote}
+                                    variant="success"
+                                    style={{ marginTop: 30, width: '100%', maxWidth: 280, paddingVertical: 18 }}
+                                />
                             ) : (
                                 <Text style={styles.waitingTextReveal}>Waiting for Host...</Text>
                             )}
@@ -631,8 +644,18 @@ const styles = StyleSheet.create({
     sidebar: { width: 300, backgroundColor: 'rgba(0,0,0,0.3)', padding: 20, borderRightWidth: 1, borderRightColor: 'rgba(255,255,255,0.1)' },
     sidebarTitle: { color: Colors.textSecondary, fontSize: 14, fontWeight: 'bold', marginBottom: 20, letterSpacing: 2 },
 
-    // Mobile Header
-    mobileHeader: { width: '100%', minHeight: 60, maxHeight: 100, flexDirection: 'row', backgroundColor: 'rgba(0,0,0,0.3)', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, flexWrap: 'wrap', gap: 6 },
+    // Mobile Header - compact single row
+    mobileHeader: {
+        width: '100%',
+        height: 50,
+        flexDirection: 'row',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        justifyContent: 'space-between',
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255,255,255,0.1)',
+    },
 
     // Leaderboard Items
     lbItem: { flexDirection: 'row', justifyContent: 'space-between', padding: 10, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.05)', marginBottom: 8 },
