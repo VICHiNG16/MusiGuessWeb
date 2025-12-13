@@ -8,7 +8,7 @@ import { Colors } from '../constants/Colors';
 import { searchArtists } from '../utils/itunes';
 import { Ionicons } from '@expo/vector-icons';
 import { SettingsModal } from '../components/SettingsModal';
-import Animated, { FadeIn, FadeOut, SlideInRight, SlideInLeft } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, SlideInRight, SlideInLeft, FadeInUp } from 'react-native-reanimated';
 
 type ViewMode = 'MENU' | 'SINGLE' | 'MULTI';
 
@@ -25,23 +25,12 @@ export default function HomeScreen() {
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [searching, setSearching] = useState(false);
     const [settingsVisible, setSettingsVisible] = useState(false);
+    const [cookieAccepted, setCookieAccepted] = useState(false);
 
-    // Debounce search
     useEffect(() => {
-        const timer = setTimeout(async () => {
-            if (artistQuery.length >= 2 && !selectedArtist) {
-                setSearching(true);
-                const results = await searchArtists(artistQuery);
-                setSearchResults(results as any[]);
-                setSearching(false);
-            } else if (artistQuery.length === 0) {
-                setSearchResults([]);
-                setSelectedArtist(null);
-                setSelectedArtistImage(null);
-            }
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [artistQuery, selectedArtist]);
+        // Check local storage for cookie consent (mock for now, or true session)
+        // For now, just show it every time or simple state
+    }, []);
 
     const selectArtist = (name: string, image: string) => {
         setSelectedArtist(name);
@@ -62,6 +51,44 @@ export default function HomeScreen() {
             router.push(`/lobby/${gameCode}?isHost=false`);
         }
     };
+
+    const renderCookieBanner = () => (
+        !cookieAccepted && (
+            <Animated.View entering={FadeInUp.delay(1000)} style={styles.cookieBanner}>
+                <Text style={styles.cookieText}>
+                    We use cookies to personalize content and ads, to provide social media features and to analyze our traffic.
+                    By using our site, you consent to our privacy policy.
+                </Text>
+                <GlassButton
+                    title="Accept"
+                    onPress={() => setCookieAccepted(true)}
+                    style={{ height: 40, width: 100 }}
+                    textStyle={{ fontSize: 14 }}
+                />
+            </Animated.View>
+        )
+    );
+
+    const renderFAQ = () => (
+        <View style={styles.faqContainer}>
+            <Text style={styles.aboutSubtitle}>Frequently Asked Questions</Text>
+
+            <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Is MusiGuess free to play?</Text>
+                <Text style={styles.faqAnswer}>Yes! MusiGuess is 100% free. You can play unlimited rounds locally or with friends.</Text>
+            </View>
+
+            <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Do I need an Apple Music subscription?</Text>
+                <Text style={styles.faqAnswer}>No. We use 30-second previews provided by iTunes which are free for everyone. If you want to listen to the full song, we provide a link to Apple Music.</Text>
+            </View>
+
+            <View style={styles.faqItem}>
+                <Text style={styles.faqQuestion}>Can I play with friends?</Text>
+                <Text style={styles.faqAnswer}>Absolutely. Choose "Multiplayer", share the 6-digit room code with your friends, and see who knows their music best!</Text>
+            </View>
+        </View>
+    );
 
     const renderHeader = () => (
         <View style={styles.header}>
@@ -238,10 +265,17 @@ export default function HomeScreen() {
                             {viewMode === 'MULTI' && renderMultiplayer()}
                         </View>
 
-                        {viewMode === 'MENU' && renderAbout()}
+                        {viewMode === 'MENU' && (
+                            <>
+                                {renderAbout()}
+                                {renderFAQ()}
+                            </>
+                        )}
                         {viewMode === 'MENU' && renderFooter()}
                     </ScrollView>
                 </KeyboardAvoidingView>
+
+                {renderCookieBanner()}
             </SafeAreaView>
         </View>
     );
@@ -352,6 +386,18 @@ const styles = StyleSheet.create({
         borderRadius: 24,
         marginBottom: 40
     },
+    faqContainer: {
+        width: '100%',
+        maxWidth: 800,
+        padding: 30,
+        marginBottom: 40,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.05)'
+    },
+    faqItem: { marginBottom: 20 },
+    faqQuestion: { color: Colors.text, fontSize: 18, fontWeight: 'bold', marginBottom: 5 },
+    faqAnswer: { color: Colors.textSecondary, fontSize: 16, lineHeight: 24 },
+
     aboutTitle: {
         fontSize: 28,
         fontFamily: 'Outfit_700Bold',
@@ -380,6 +426,29 @@ const styles = StyleSheet.create({
         marginTop: 20,
         textAlign: 'center',
         opacity: 0.7
+    },
+    cookieBanner: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: '#1E1E24',
+        padding: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.1)',
+        zIndex: 100,
+        flexWrap: 'wrap',
+        gap: 10
+    },
+    cookieText: {
+        color: Colors.textSecondary,
+        fontSize: 12,
+        flex: 1,
+        marginRight: 20,
+        minWidth: 200
     },
     footer: {
         width: '100%',
