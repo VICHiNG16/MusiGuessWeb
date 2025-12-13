@@ -25,6 +25,7 @@ export default function HomeScreen() {
     const [username, setUsername] = useState('');
     const [artistQuery, setArtistQuery] = useState('');
     const [selectedArtist, setSelectedArtist] = useState<string | null>(null);
+    const [selectedArtistImage, setSelectedArtistImage] = useState<string | null>(null);
     const [searchResults, setSearchResults] = useState<ArtistResult[]>([]);
     const [searching, setSearching] = useState(false);
     const [settingsVisible, setSettingsVisible] = useState(false);
@@ -54,14 +55,16 @@ export default function HomeScreen() {
             } else if (artistQuery.length === 0) {
                 setSearchResults([]);
                 setSelectedArtist(null);
+                setSelectedArtistImage(null);
             }
         }, 500);
         return () => clearTimeout(timer);
     }, [artistQuery, selectedArtist]);
 
-    const selectArtist = (name: string) => {
-        setSelectedArtist(name);
-        setArtistQuery(name);
+    const selectArtist = (item: any) => {
+        setSelectedArtist(item.artistName);
+        setSelectedArtistImage(item.image);
+        setArtistQuery(item.artistName);
         setSearchResults([]);
     };
 
@@ -72,7 +75,7 @@ export default function HomeScreen() {
         const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
         const isSolo = viewMode === 'SINGLE';
         const hostName = username.trim() || 'Host';
-        router.push(`/lobby/${roomId}?isHost=true&mode=${isSolo ? 'solo' : 'multi'}&artist=${encodeURIComponent(selectedArtist)}&username=${encodeURIComponent(hostName)}`);
+        router.push(`/lobby/${roomId}?isHost=true&mode=${isSolo ? 'solo' : 'multi'}&artist=${encodeURIComponent(selectedArtist)}&artistImage=${encodeURIComponent(selectedArtistImage || '')}&username=${encodeURIComponent(hostName)}`);
     };
 
     const joinRoom = () => {
@@ -123,7 +126,7 @@ export default function HomeScreen() {
                         <Pressable
                             key={item.artistId}
                             style={styles.dropdownItem}
-                            onPress={() => selectArtist(item.artistName)}
+                            onPress={() => selectArtist(item)}
                         >
                             {item.image && (
                                 <Image source={{ uri: item.image }} style={styles.artistImage} />
