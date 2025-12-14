@@ -142,7 +142,7 @@ export default function HomeScreen() {
 
             {selectedArtist && (
                 <GlassButton
-                    title="Start Game"
+                    title={viewMode === 'SINGLE' ? "Next" : "Start Game"}
                     onPress={startGame}
                     style={{ marginTop: 20 }}
                     disabled={viewMode === 'MULTI' && !username.trim()}
