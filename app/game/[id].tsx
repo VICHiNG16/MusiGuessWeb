@@ -516,15 +516,10 @@ export default function GameScreen() {
                     </View>
                 )}
 
-                {/* Right: Game Area */}
-                <ScrollView
-                    style={{ flex: 1, width: '100%' }}
-                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}
-                    showsVerticalScrollIndicator={false}
-                >
-                    <View style={{ width: '100%', maxWidth: 800, alignItems: 'center' }}>
-                        {/* Round Progress */}
-                        <View style={styles.roundProgress}>
+                {/* Fixed Header: Round Progress + Timer (Mobile) */}
+                {isMobile && (
+                    <View style={styles.fixedGameHeader}>
+                        <View style={{ flex: 1 }}>
                             <Text style={styles.roundText}>
                                 ROUND {(gameData?.currentRound || 0) + 1} / {gameData?.songs?.length || 5}
                             </Text>
@@ -537,11 +532,33 @@ export default function GameScreen() {
                                 />
                             </View>
                         </View>
+                        <View style={styles.mobileTimer}>
+                            <Text style={styles.timerSmall}>{timeRemaining}</Text>
+                        </View>
+                    </View>
+                )}
 
-                        {/* Mobile Timer */}
-                        {isMobile && (
-                            <View style={styles.mobileTimer}>
-                                <Text style={styles.timerSmall}>{timeRemaining}</Text>
+                {/* Right: Game Area */}
+                <ScrollView
+                    style={{ flex: 1, width: '100%' }}
+                    contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={{ width: '100%', maxWidth: 800, alignItems: 'center' }}>
+                        {/* Round Progress - Desktop only */}
+                        {!isMobile && (
+                            <View style={styles.roundProgress}>
+                                <Text style={styles.roundText}>
+                                    ROUND {(gameData?.currentRound || 0) + 1} / {gameData?.songs?.length || 5}
+                                </Text>
+                                <View style={styles.progressBar}>
+                                    <View
+                                        style={[
+                                            styles.progressFill,
+                                            { width: `${(((gameData?.currentRound || 0) + 1) / (gameData?.songs?.length || 5)) * 100}%` }
+                                        ]}
+                                    />
+                                </View>
                             </View>
                         )}
 
@@ -701,7 +718,17 @@ const styles = StyleSheet.create({
     mainArea: { flex: 1, padding: 20, justifyContent: 'center', alignItems: 'center' },
 
     timer: { fontSize: 64, color: Colors.primary, fontWeight: '900' },
-    mobileTimer: { position: 'absolute', top: 20, right: 20, width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: Colors.primary, alignItems: 'center', justifyContent: 'center' },
+    fixedGameHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255,255,255,0.1)',
+        gap: 16,
+    },
+    mobileTimer: { width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: Colors.primary, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
     timerSmall: { fontSize: 20, color: Colors.primary, fontWeight: 'bold' },
 
     // Game Elements
