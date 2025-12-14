@@ -316,25 +316,28 @@ export default function HomeScreen() {
         <View style={styles.container}>
             <BackgroundGradient />
             <SafeAreaView style={styles.content}>
-                {viewMode !== 'MENU' && (
+                {/* Fixed Top Bar - stays at top when scrolling */}
+                <View style={styles.fixedTopBar}>
+                    {viewMode !== 'MENU' && (
+                        <Pressable
+                            onPress={() => setViewMode('MENU')}
+                            style={styles.topBarButton}
+                            accessibilityLabel="Go back to menu"
+                            accessibilityRole="button"
+                        >
+                            <Ionicons name="arrow-back" size={22} color={Colors.text} />
+                        </Pressable>
+                    )}
+
+                    <View style={{ flex: 1 }} />
+
                     <Pressable
-                        onPress={() => setViewMode('MENU')}
-                        style={styles.topLeftBackButton}
-                        accessibilityLabel="Go back to menu"
-                        accessibilityRole="button"
+                        onPress={() => setSettingsVisible(true)}
+                        style={styles.topBarButton}
                     >
-                        <Ionicons name="arrow-back" size={22} color={Colors.text} />
+                        <Ionicons name="settings-outline" size={28} color={Colors.textSecondary} />
                     </Pressable>
-                )}
-
-                <Pressable
-                    onPress={() => setSettingsVisible(true)}
-                    style={{ position: 'absolute', top: 50, right: 20, zIndex: 10 }}
-                >
-                    <Ionicons name="settings-outline" size={28} color={Colors.textSecondary} />
-                </Pressable>
-
-
+                </View>
 
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -383,9 +386,21 @@ const styles = StyleSheet.create({
     content: { flex: 1 }, // Changed from padding: 24 to full width
     scrollContent: {
         alignItems: 'center',
-        paddingVertical: 40,
+        paddingVertical: 20,
         paddingHorizontal: 24,
         minHeight: '100%'
+    },
+    fixedTopBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        width: '100%',
+    },
+    topBarButton: {
+        padding: 10,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        borderRadius: 12,
     },
     header: { alignItems: 'center', marginBottom: 40, marginTop: 20 },
     title: {
