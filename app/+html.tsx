@@ -82,6 +82,20 @@ export default function Root({ children }: PropsWithChildren) {
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link rel="preconnect" href="https://itunes.apple.com" />
 
+                {/* GitHub Pages SPA redirect handling */}
+                <script dangerouslySetInnerHTML={{
+                    __html: `
+                    (function(l) {
+                        if (l.search[1] === '/') {
+                            var decoded = l.search.slice(1).split('&').map(function(s) {
+                                return s.replace(/~and~/g, '&')
+                            }).join('?');
+                            window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+                        }
+                    }(window.location))
+                    `
+                }} />
+
                 <ScrollViewStyleReset />
 
                 {/* Global Styles */}
