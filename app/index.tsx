@@ -316,28 +316,16 @@ export default function HomeScreen() {
         <View style={styles.container}>
             <BackgroundGradient />
             <SafeAreaView style={styles.content}>
-                {/* Fixed Top Bar - stays at top when scrolling */}
-                <View style={styles.fixedTopBar}>
-                    {viewMode !== 'MENU' && (
-                        <Pressable
-                            onPress={() => setViewMode('MENU')}
-                            style={styles.topBarButton}
-                            accessibilityLabel="Go back to menu"
-                            accessibilityRole="button"
-                        >
-                            <Ionicons name="arrow-back" size={22} color={Colors.text} />
-                        </Pressable>
-                    )}
-
-                    <View style={{ flex: 1 }} />
-
+                {viewMode !== 'MENU' && (
                     <Pressable
-                        onPress={() => setSettingsVisible(true)}
-                        style={styles.topBarButton}
+                        onPress={() => setViewMode('MENU')}
+                        style={styles.topLeftBackButton}
+                        accessibilityLabel="Go back to menu"
+                        accessibilityRole="button"
                     >
-                        <Ionicons name="settings-outline" size={28} color={Colors.textSecondary} />
+                        <Ionicons name="arrow-back" size={22} color={Colors.text} />
                     </Pressable>
-                </View>
+                )}
 
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -349,6 +337,17 @@ export default function HomeScreen() {
                         style={{ width: '100%', flex: 1 }}
                         keyboardShouldPersistTaps="handled"
                     >
+                        {/* Settings button - scrolls with content */}
+                        <View style={styles.scrollableTopBar}>
+                            <View style={{ flex: 1 }} />
+                            <Pressable
+                                onPress={() => setSettingsVisible(true)}
+                                style={styles.topBarButton}
+                            >
+                                <Ionicons name="settings-outline" size={28} color={Colors.textSecondary} />
+                            </Pressable>
+                        </View>
+
                         {renderHeader()}
 
                         <View style={styles.mainContent}>
@@ -401,6 +400,12 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
         borderRadius: 12,
+    },
+    scrollableTopBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 10,
     },
     header: { alignItems: 'center', marginBottom: 40, marginTop: 20 },
     title: {
